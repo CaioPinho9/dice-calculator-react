@@ -1,6 +1,6 @@
 import logo from './logo.png';
 import './App.css';
-import Counter from './Counter';
+import Counter from './components/Counter';
 
 function App() {
   return (

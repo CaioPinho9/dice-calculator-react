@@ -1,4 +1,7 @@
-class Utils {
+// @ts-ignore
+import Dictionary from "./Dictionary.ts";
+
+export default class Utils {
 
   public static Permutation(n:number, p:number) {
     return Utils.Fatorial(n)/(Utils.Fatorial(p)*(Utils.Fatorial(n-p)))
@@ -12,15 +15,24 @@ class Utils {
     return result;
   }
 
-  //Convert a array of percent values into an array of chances
-  public static PercentToChance(array:Array<number>) {
-    return array.map(function(x) { return x * array.reduce((a, b) => a + b, 0) });
+  //Convert a dictionary of percent values into an dictionary of chances
+  public static PercentToChance(percents:Dictionary, totalChances:number) {
+    var chances = new Dictionary();
+    percents.getKeys().forEach((key: number) => {
+      const value = percents.get(Number(key))
+      chances.add(Number(key), parseFloat(((value * totalChances) / 100).toFixed(2)))
+    })
+    return chances
   }
 
-  //Convert a array of chances into an array of percent values
-  public static ChanceToPercent(array:Array<number>) {
-    return array.map(function(x) { 
-      return parseFloat(((x / array.reduce((a, b) => a + b, 0)) * 100).toFixed(2))
+  //Convert a dictionary of chances into an dictionary of percent values
+  public static ChanceToPercent(chances:Dictionary) {
+    var percents = new Dictionary();
+    let totalChances = chances.sum();
+    chances.getKeys().forEach((key: number) => {
+      const value = chances.get(Number(key))
+      percents.add(Number(key), parseFloat(((value / totalChances) * 100).toFixed(2)))
     })
+    return percents
   }
 }
