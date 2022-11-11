@@ -15,15 +15,15 @@ export default class Dictionary implements IKeyCollection {
 
   add(key: number, value: number) {
     if (this.items[key] != null) {
-      this.count++;
       this.items[key] += value;
     } else {
+      this.count++;
       this.items[key] = value;
     }
   }
 
   set(key: number, value: number) {
-    if (!this.items[key] == null) {
+    if (this.items[key] == null) {
       this.count++;
     }
 
@@ -81,5 +81,9 @@ export default class Dictionary implements IKeyCollection {
 
     this.values().forEach((value) => (sum += value));
     return sum;
+  }
+
+  min(): number {
+    return Math.min(...this.getKeys());
   }
 }

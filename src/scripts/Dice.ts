@@ -14,6 +14,7 @@ export default class Dice {
     this.probability = Dice.Probability(sideDice, nDice);
   }
 
+  //Basic probability calculation for n s-dice
   public static Probability(sideDice: number, nDice: number): Dictionary {
     var probability = new Dictionary();
     for (var key = nDice; key <= sideDice * nDice; key++) {
@@ -22,7 +23,8 @@ export default class Dice {
     return Utils.DecimalToChance(probability, sideDice ** nDice);
   }
 
-  public static MergeDiceProbability(
+  //Unify two probabilities curves
+  public static MergeProbability(
     probability1: Dictionary,
     probability2: Dictionary,
     //Sum = true, minus = false
@@ -41,6 +43,19 @@ export default class Dice {
     return probability;
   }
 
+  //Move the probability curve horizontally
+  public static DeslocateProbability(
+    probOld: Dictionary,
+    value: number
+  ): Dictionary {
+    var probNew = new Dictionary();
+
+    probOld.getKeys().forEach((key: number) => {
+      probNew.add(key + value, probOld.get(key));
+    });
+    return probNew;
+  }
+
   public getProbability(): Dictionary {
     return this.probability;
   }
@@ -49,8 +64,5 @@ export default class Dice {
   }
   public getNDice(): number {
     return this.nDice;
-  }
-  public setProbability(probability: Dictionary) {
-    this.probability = probability;
   }
 }

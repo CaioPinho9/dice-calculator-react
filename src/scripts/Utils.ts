@@ -2,6 +2,7 @@
 import Dictionary from "./Dictionary.ts";
 
 export default class Utils {
+  //Find the probability of one number in n s-dices
   public static ExactSumProbability(
     sum: number,
     nDices: number,
@@ -44,8 +45,8 @@ export default class Utils {
   public static DecimalToChance(decimals: Dictionary, totalChances: number) {
     var chances = new Dictionary();
     decimals.getKeys().forEach((key: number) => {
-      const value = decimals.get(Number(key));
-      chances.set(Number(key), parseFloat((value * totalChances).toFixed(2)));
+      const value = decimals.get(key);
+      chances.set(key, parseFloat((value * totalChances).toFixed(2)));
     });
     return chances;
   }
@@ -56,10 +57,7 @@ export default class Utils {
     let totalChances = chances.sum();
     chances.getKeys().forEach((key: number) => {
       const value = chances.get(Number(key));
-      percents.set(
-        Number(key),
-        parseFloat(((value / totalChances) * 100).toFixed(2))
-      );
+      percents.set(key, parseFloat(((value / totalChances) * 100).toFixed(2)));
     });
     return percents;
   }
@@ -69,8 +67,8 @@ export default class Utils {
     var decimals = new Dictionary();
     let totalChances = chances.sum();
     chances.getKeys().forEach((key: number) => {
-      const value = chances.get(Number(key));
-      decimals.set(Number(key), parseFloat((value / totalChances).toFixed(2)));
+      const value = chances.get(key);
+      decimals.set(key, parseFloat((value / totalChances).toFixed(2)));
     });
     return decimals;
   }
