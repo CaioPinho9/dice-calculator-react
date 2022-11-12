@@ -4,43 +4,95 @@ import Dictionary from "./Dictionary.ts";
 import Utils from "./Utils.ts";
 
 export default class Dice {
-  private probability: Dictionary;
+  private chances: Dictionary;
   private sideDice: number;
   private nDice: number;
 
   constructor(nDice: number, sideDice: number) {
     this.nDice = nDice;
     this.sideDice = sideDice;
-    this.probability = Dice.Probability(sideDice, nDice);
+    this.chances = Dice.Chances(nDice, sideDice);
   }
 
   //Basic probability calculation for n s-dice
-  public static Probability(sideDice: number, nDice: number): Dictionary {
-    var probability = new Dictionary();
+  public static Chances(nDice: number, sideDice: number): Dictionary {
+    var percent = new Dictionary();
     for (var key = nDice; key <= sideDice * nDice; key++) {
-      probability.set(key, Utils.ExactSumProbability(key, nDice, sideDice));
+      percent.set(key, Utils.ExactSumProbability(key, nDice, sideDice));
     }
-    return Utils.DecimalToChance(probability, sideDice ** nDice);
+    return Utils.DecimalToChance(percent, sideDice ** nDice);
+  }
+
+  //Recalculate probability if number is lower than "reroll"
+  public static ChancesRerollOne(
+    nDice: number,
+    sideDice: number,
+    reroll: number
+  ): Dictionary {
+    var chances = new Dictionary();
+    for (var n = 1; n <= nDice; n++) {
+      var chancesRerolled = new Dictionary();
+      for (var key = 1; key <= sideDice; key++) {
+        var chancesReroll = new Dictionary();
+        chancesReroll.set(key, 1);
+        if (key <= reroll) {
+          chancesReroll = Dice.Chances(1, sideDice);
+        }
+        if (chancesRerolled.size() === 0) {
+          chancesRerolled = chancesReroll;
+        } else {
+          chancesRerolled = Dice.SumChances(
+            chancesRerolled,
+            chancesReroll,
+            true
+          );
+        }
+      }
+      if (chances.size() === 0) {
+        chances = chancesRerolled;
+      } else {
+        chances = Dice.MergeChances(chances, chancesRerolled, true);
+      }
+    }
+    return chances;
   }
 
   //Unify two probabilities curves
-  public static MergeProbability(
-    probability1: Dictionary,
-    probability2: Dictionary,
+  public static MergeChances(
+    chances1: Dictionary,
+    chances2: Dictionary,
     //Sum = true, minus = false
     sum: boolean
   ): Dictionary {
-    var probability = new Dictionary();
+    var chances = new Dictionary();
 
-    probability1.getKeys().forEach((key1: number) => {
-      probability2.getKeys().forEach((key2: number) => {
-        probability.add(
+    chances1.getKeys().forEach((key1: number) => {
+      chances2.getKeys().forEach((key2: number) => {
+        chances.add(
           key1 + key2 * (sum ? 1 : -1),
-          probability1.get(key1) * probability2.get(key2)
+          chances1.get(key1) * chances2.get(key2)
         );
       });
     });
-    return probability;
+    return chances;
+  }
+
+  //Unify two probabilities curves
+  public static SumChances(
+    chances1: Dictionary,
+    chances2: Dictionary,
+    //Sum = true, minus = false
+    sum: boolean
+  ): Dictionary {
+    var chances = new Dictionary();
+
+    chances1.getKeys().forEach((key1: number) => {
+      chances.add(key1, chances1.get(key1));
+    });
+    chances2.getKeys().forEach((key2: number) => {
+      chances.add(key2, chances2.get(key2) * (sum ? 1 : -1));
+    });
+    return chances;
   }
 
   //Move the probability curve horizontally
@@ -56,8 +108,8 @@ export default class Dice {
     return probNew;
   }
 
-  public getProbability(): Dictionary {
-    return this.probability;
+  public getChances(): Dictionary {
+    return this.chances;
   }
   public getSide(): number {
     return this.sideDice;
