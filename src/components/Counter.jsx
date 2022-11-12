@@ -18,7 +18,7 @@ class Counter extends Component {
   test() {
     var dice1 = new Dice(2, 6);
     var dice2 = new Dice(1, 4);
-    var dice3 = Utils.ChanceToPercent(Dice.ChancesRerollOne(2, 6, 2));
+    var dice3 = Utils.ChanceToPercent(Dice.ChancesRerollOne(2, 6, 1, true));
     var string = "";
     for (let index = dice3.min(); index < dice3.size() + dice3.min(); index++) {
       string += index + ":" + dice3.get(index) + " ";

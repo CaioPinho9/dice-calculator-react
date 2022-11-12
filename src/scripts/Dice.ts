@@ -27,7 +27,8 @@ export default class Dice {
   public static ChancesRerollOne(
     nDice: number,
     sideDice: number,
-    reroll: number
+    reroll: number,
+    rerollAlways: boolean
   ): Dictionary {
     var chances = new Dictionary();
     for (var n = 1; n <= nDice; n++) {
@@ -37,6 +38,13 @@ export default class Dice {
         chancesReroll.set(key, 1);
         if (key <= reroll) {
           chancesReroll = Dice.Chances(1, sideDice);
+          if (rerollAlways) {
+            chancesReroll.getKeys().forEach((key: number) => {
+              if (key <= reroll) {
+                chancesReroll.removeItem(key);
+              }
+            });
+          }
         }
         if (chancesRerolled.size() === 0) {
           chancesRerolled = chancesReroll;
