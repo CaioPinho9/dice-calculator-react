@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import Dice from "../scripts/Dice.ts";
-import Dictionary from "../scripts/Dictionary.ts";
 import Utils from "../scripts/Utils.ts";
 
 class Counter extends Component {
@@ -19,7 +18,7 @@ class Counter extends Component {
   test() {
     var dice1 = new Dice(2, 6);
     var dice2 = new Dice(1, 4);
-    var dice3 = Utils.ChanceToPercent(Dice.ChancesRerollOne(2, 6));
+    var dice3 = Utils.ChanceToPercent(Dice.ChancesRerollOne(2, 6, 2));
     var string = "";
     for (let index = dice3.min(); index < dice3.size() + dice3.min(); index++) {
       string += index + ":" + dice3.get(index) + " ";

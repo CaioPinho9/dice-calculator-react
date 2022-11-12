@@ -70,7 +70,7 @@ export default class Dice {
       chances2.getKeys().forEach((key2: number) => {
         chances.add(
           key1 + key2 * (sum ? 1 : -1),
-          chances1.get(key1) * chances2.get(key2)
+          chances1.get(key1) + chances2.get(key2)
         );
       });
     });
