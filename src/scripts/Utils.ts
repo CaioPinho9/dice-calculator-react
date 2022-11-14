@@ -32,11 +32,8 @@ export default class Utils {
   public static PercentToChance(percents: Dictionary, totalChances: number) {
     var chances = new Dictionary();
     percents.getKeys().forEach((key: number) => {
-      const value = percents.get(Number(key));
-      chances.set(
-        Number(key),
-        parseFloat(((value * totalChances) / 100).toFixed(2))
-      );
+      const value = percents.get(key);
+      chances.set(key, parseFloat(((value * totalChances) / 100).toFixed(2)));
     });
     return chances;
   }
@@ -56,7 +53,7 @@ export default class Utils {
     var percents = new Dictionary();
     let totalChances = chances.sum();
     chances.getKeys().forEach((key: number) => {
-      const value = chances.get(Number(key));
+      const value = chances.get(key);
       percents.set(key, parseFloat(((value / totalChances) * 100).toFixed(2)));
     });
     return percents;

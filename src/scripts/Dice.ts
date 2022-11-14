@@ -39,6 +39,7 @@ export default class Dice {
         if (key <= reroll) {
           chancesReroll = Dice.Chances(1, sideDice);
           if (rerollAlways) {
+            // eslint-disable-next-line
             chancesReroll.getKeys().forEach((key: number) => {
               if (key <= reroll) {
                 chancesReroll.removeItem(key);
@@ -63,6 +64,94 @@ export default class Dice {
       }
     }
     return chances;
+  }
+
+  public static AdvantageChances(
+    nDice: number,
+    sideDice: number,
+    advantage: boolean,
+    nRemove: number,
+    reRoll: boolean
+  ): Dictionary {
+    var advantageArray = new Array(nDice);
+    var chancesArray = new Array(sideDice + 1);
+
+    //[1,1,1,1]
+    advantageArray.fill(1);
+
+    var lastIndex = 0;
+
+    for (var index = 0; index < advantageArray.length; ) {
+      //Saves to add
+      var sortArray = [...advantageArray];
+      var result: number = 0;
+      for (var i = 0; i < nRemove; i++) {
+        var value: number = sortArray.splice(0, 1)[0];
+        for (var sortI = 0; sortI < sortArray.length; sortI++) {
+          if (advantage) {
+            if (value < sortArray[sortI]) {
+              sortArray.push(value);
+              value = sortArray.splice(sortI, 1)[0];
+            }
+          } else {
+            if (value > sortArray[sortI]) {
+              sortArray.push(value);
+              value = sortArray.splice(sortI, 1)[0];
+            }
+          }
+        }
+        result += value;
+      }
+      if (chancesArray[result] == null) {
+        chancesArray[result] = 1;
+      } else {
+        chancesArray[result] += 1;
+      }
+
+      //Checks all index
+      for (var check = 0; check <= lastIndex; check++) {
+        //When the array is completed, it breaks the loop Ex: 4d6 [6,6,6,6]
+        if (advantageArray.reduce((a, b) => a + b, 0) === sideDice * nDice) {
+          index = advantageArray.length;
+          break;
+        }
+
+        if (index === lastIndex && advantageArray[lastIndex] >= sideDice) {
+          index = 0;
+          advantageArray[lastIndex] = 1;
+          lastIndex++;
+          advantageArray[lastIndex]++;
+          break;
+        }
+
+        //When this array[index] is full it resets and increases the index
+        if (advantageArray[index] === sideDice) {
+          advantageArray[index] = 1;
+          index += 1;
+
+          //If it's not full the array increases
+        } else {
+          advantageArray[index]++;
+          index = 0;
+          break;
+        }
+      }
+    }
+
+    //Halfling reroll, afects very little in advantage
+    if (reRoll) {
+      if (advantage) {
+        chancesArray[1] = 0;
+      } else {
+        chancesArray[1] = chancesArray[2] / 2;
+      }
+    }
+    //Convert array to dictionary of chances
+    var chancesDictionary = new Dictionary();
+    chancesArray.forEach((value: number, key: number) => {
+      chancesDictionary.set(key, value);
+    });
+    return chancesDictionary;
   }
 
   //Unify two probabilities curves
