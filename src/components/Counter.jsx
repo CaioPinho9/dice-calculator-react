@@ -1,7 +1,6 @@
 import React, { Component } from "react";
 import Dice from "../scripts/Dice.ts";
 import Utils from "../scripts/Utils.ts";
-import Dictionary from "../scripts/Dictionary.ts";
 
 class Counter extends Component {
   state = {
@@ -17,7 +16,7 @@ class Counter extends Component {
   }
 
   test() {
-    var dice = Dice.AdvantageChances(4, 6, true, 3, false);
+    var dice = Dice.AdvantageChances(2, 6, false, 1, false);
 
     var dice3 = Utils.ChanceToPercent(dice);
     var string = "";

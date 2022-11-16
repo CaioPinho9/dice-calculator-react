@@ -70,7 +70,7 @@ export default class Dice {
     nDice: number,
     sideDice: number,
     advantage: boolean,
-    nRemove: number,
+    nKeep: number,
     reRoll: boolean
   ): Dictionary {
     var advantageArray = new Array(nDice);
@@ -85,7 +85,7 @@ export default class Dice {
       //Saves to add
       var sortArray = [...advantageArray];
       var result: number = 0;
-      for (var i = 0; i < nRemove; i++) {
+      for (var i = 0; i < nKeep; i++) {
         var value: number = sortArray.splice(0, 1)[0];
         for (var sortI = 0; sortI < sortArray.length; sortI++) {
           if (advantage) {

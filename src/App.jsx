@@ -1,15 +1,24 @@
-import logo from './logo.png';
-import './App.css';
-import Counter from './components/Counter';
+import "./App.css";
+import Header from "./components/Header";
+import { Route, Routes, BrowserRouter } from "react-router-dom";
+import DnD from "./pages/DnD";
+import Gurps from "./pages/Gurps";
+import CoC from "./pages/CoC";
+import React from "react";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <Counter/>
-      </header>
-    </div>
+    <BrowserRouter>
+      <div className="App">
+        <Header />
+          <Routes>
+            <Route path="/" element={<DnD />} />
+            <Route path="/dnd" element={<DnD />} />
+            <Route path="/gurps" element={<Gurps />} />
+            <Route path="/coc" element={<CoC />} />
+          </Routes>
+      </div>
+    </BrowserRouter>
   );
 }
 
