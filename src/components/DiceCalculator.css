@@ -15,7 +15,7 @@
 }
 
 .Calculator-form {
-  background-color: rgba(215, 234, 250, 0.9);
+  background-color: rgba(215, 234, 250, 0.8);
   width: fit-content;
   border-radius: 10px;
   padding: 5px;
@@ -23,6 +23,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
+  border: 2px solid #444;
 }
 
 .break {
@@ -34,7 +35,8 @@
   margin: 0px;
 }
 
-.Calculator-form select, input {
+.Calculator-form select,
+input {
   background-color: #a3b6d8;
   border: 2px solid #7181a1;
   border-radius: 5px;
@@ -47,4 +49,14 @@
 .Calculator-form input:focus {
   outline: 1px solid #1496de;
   border-color: #1496de;
+}
+
+.Form-btn {
+  width: 30px;
+  margin-top: 10px;
+}
+
+.Calculator-chart {
+  border: 2px solid #666;
+  border-radius: 10px;
 }

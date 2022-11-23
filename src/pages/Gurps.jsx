@@ -8,7 +8,7 @@ class Gurps extends Component {
     return (
       <main className="container Pages">
         <h1>GURPS</h1>
-        <DiceCalculator rpgSistem="gurps" />
+        <DiceCalculator rpgSystem="gurps" />
       </main>
     );
   }

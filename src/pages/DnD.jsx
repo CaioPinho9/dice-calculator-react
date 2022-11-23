@@ -8,7 +8,7 @@ class DnD extends Component {
     return (
       <main className="container Pages">
         <h1>D&D</h1>
-        <DiceCalculator />
+        <DiceCalculator rpgSystem="dnd" />
       </main>
     );
   }

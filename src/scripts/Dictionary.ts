@@ -86,4 +86,8 @@ export default class Dictionary implements IKeyCollection {
   min(): number {
     return Math.min(...this.getKeys());
   }
+
+  max(): number {
+    return Math.max(...this.getKeys());
+  }
 }

@@ -24,7 +24,7 @@ export default class Dice {
   }
 
   //Recalculate probability if number is lower than "reroll"
-  public static ChancesRerollOne(
+  public static ChancesReroll(
     nDice: number,
     sideDice: number,
     reroll: number,
