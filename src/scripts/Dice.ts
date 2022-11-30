@@ -39,7 +39,6 @@ export default class Dice {
         if (key <= reroll) {
           chancesReroll = Dice.Chances(1, sideDice);
           if (rerollAlways) {
-            // eslint-disable-next-line
             chancesReroll.getKeys().forEach((key: number) => {
               if (key <= reroll) {
                 chancesReroll.removeItem(key);

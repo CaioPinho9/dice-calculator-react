@@ -90,4 +90,13 @@ export default class Dictionary implements IKeyCollection {
   max(): number {
     return Math.max(...this.getKeys());
   }
+
+  toArray(): number[] {
+    let array: any[] = [];
+    const min: number = this.min();
+    for (let key = 0; key <= this.max() - min; key++) {
+      array[key] = this.get(key + min);
+    }
+    return array;
+  }
 }

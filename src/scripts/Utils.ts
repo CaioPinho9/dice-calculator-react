@@ -69,4 +69,16 @@ export default class Utils {
     });
     return decimals;
   }
+
+  public static RandomColor(blue: boolean): string {
+    let r: number, g: number, b: number;
+    if (blue) {
+      return `rgb(20, 152, 222)`;
+    } else {
+      r = Math.random() * 255;
+      g = Math.random() * 255;
+      b = Math.random() * 255;
+    }
+    return `rgb(${r},${g},${b})`;
+  }
 }

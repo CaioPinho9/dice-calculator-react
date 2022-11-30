@@ -8,7 +8,6 @@ class DiceCalculator extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      rpgSystem: this.props.rpgSystem,
       formQnt: 1,
       formData: [],
       forms: [],
@@ -71,7 +70,7 @@ class DiceCalculator extends Component {
         <Form
           key={i}
           id={i}
-          rpgSystem={this.state.rpgSystem}
+          rpgSystem={this.props.rpgSystem}
           onChange={this.handleFormChange}
         />
       );
@@ -113,7 +112,7 @@ class DiceCalculator extends Component {
       this.state.controller,
       this.state.controller.Interpreter(
         this.state.formData,
-        this.state.rpgSystem
+        this.props.rpgSystem
       )
     );
   };

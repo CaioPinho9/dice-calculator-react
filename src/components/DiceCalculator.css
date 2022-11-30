@@ -35,7 +35,7 @@
   margin: 0px;
 }
 
-.Calculator-form select,
+.Calculator-form button,
 input {
   background-color: #a3b6d8;
   border: 2px solid #7181a1;
@@ -44,6 +44,12 @@ input {
   text-align: center;
   margin: 5px;
   margin-top: 0;
+  transition: 0.5s;
+}
+
+.Calculator-form button:hover {
+  background-color: #7f91b4;
+  border: 2px solid #7181a1;
 }
 
 .Calculator-form input:focus {

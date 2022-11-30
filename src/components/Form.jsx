@@ -15,14 +15,14 @@ class Form extends Component {
       <React.Fragment>
         <label htmlFor="">
           <br />
-          <select
-            onChange={(e) => {
-              this.setState({ extended: e.target.value === "Damage" });
+          <input
+            type="button"
+            onClick={(e) => {
+              this.setState({ extended: !this.state.extended });
+              e.preventDefault();
             }}
-          >
-            <option value="Default">Default</option>
-            <option value="Damage">Damage</option>
-          </select>
+            value={this.state.extended ? "Damage" : "Default"}
+          ></input>
         </label>
         <label htmlFor="">
           <p>Dices</p>
@@ -48,7 +48,7 @@ class Form extends Component {
             ></input>
           )}
         </label>
-        {this.props.rpgSistem === "gurps" && (
+        {this.props.rpgSystem === "gurps" && (
           <label>
             <p>NH</p>
             <input
@@ -76,7 +76,7 @@ class Form extends Component {
             }}
           ></input>
         </label>
-        {this.props.rpgSistem !== "gurps" && (
+        {this.props.rpgSystem !== "gurps" && (
           <label>
             <p>DC</p>
             <input
@@ -103,7 +103,7 @@ class Form extends Component {
                 }}
               ></input>
             </label>
-            {this.props.rpgSistem !== "gurps" && (
+            {this.props.rpgSystem !== "gurps" && (
               <label>
                 <p>Crit</p>
                 <input

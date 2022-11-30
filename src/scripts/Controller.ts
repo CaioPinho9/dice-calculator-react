@@ -1,5 +1,7 @@
 import Chart, { ChartItem } from "chart.js/auto";
 // @ts-ignore
+import Graph from "./Graph.ts";
+// @ts-ignore
 import Dice from "./Dice.ts";
 // @ts-ignore
 import Dictionary from "./Dictionary.ts";
@@ -11,14 +13,28 @@ export default class Controller {
   public rpgSystem: string;
   public normalProbability: Dictionary[] = [];
   public damageProbability: Dictionary = new Dictionary();
+  public dc: string[] = [];
 
   public Interpreter(submitData: any[], rpgSystem: string) {
+    this.normalProbability = [];
+    this.damageProbability = new Dictionary();
     this.submitData = submitData;
     this.rpgSystem = rpgSystem;
+    this.chartData = {
+      labels: [],
+      datasets: [],
+    };
     submitData.forEach((line) => {
-      let dices: string = line.dices.toLowerCase();
-      let damage: string =
-        line.damage !== null ? line.damage.toLowerCase() : "";
+      let dices: string = line.dices !== "" ? line.dices.toLowerCase() : "0d0";
+      let damage: string = line.damage !== "" ? line.damage.toLowerCase() : "";
+
+      if (!line.extended) {
+        if (rpgSystem === "dnd") {
+          this.dc.push(String(Number(line.dc) - Number(line.bonus)));
+        } else {
+          this.dc.push(String(Number(line.dc) + Number(line.bonus)));
+        }
+      }
 
       dices = dices.replace(" ", "");
       dices = dices.replace("-", "+-");
@@ -26,46 +42,60 @@ export default class Controller {
       damage = damage.replace("-", "+-");
 
       if (
-        !dices.match(/([0-9d><r~])+/) ||
+        (!dices.match(/([0-9d><r~])+/) && dices !== "") ||
         (!damage.match(/([0-9d><r~])+/) && damage !== "")
       ) {
         return;
       }
 
-      const expressionChance = this.ExpressionChance(dices);
+      let expressionChance = this.ExpressionChance(dices);
 
-      const damageChance = damage !== "" ? this.ExpressionChance(damage) : null;
+      if (rpgSystem !== "gurps") {
+        expressionChance = Dice.DeslocateProbability(
+          expressionChance,
+          Number(line.bonus)
+        );
+      }
 
-      const chancesPlusBonus: Dictionary = Dice.DeslocateProbability(
-        expressionChance,
-        Number(line.bonus)
-      );
-
-      if (!line.extends) {
-        this.normalProbability.push(chancesPlusBonus);
+      if (line.damage === "") {
+        this.normalProbability.push(expressionChance);
       } else {
-        if (this.damageProbability === null) {
-          this.damageProbability = chancesPlusBonus;
+        const dc =
+          rpgSystem === "gurps"
+            ? Number(line.dc) + Number(line.bonus)
+            : Number(line.dc);
+        const success = this.DifficultyClass(dc, expressionChance, rpgSystem);
+        const damageChance = this.ExpressionChance(damage);
+        damageChance.set(
+          0,
+          Math.round((damageChance.sum() * (1 - success)) / success)
+        );
+        if (this.damageProbability.size() === 0) {
+          this.damageProbability = damageChance;
         } else {
           this.damageProbability = Dice.MergeChances(
             this.damageProbability,
-            chancesPlusBonus
+            damageChance
           );
         }
       }
-
-      this.FormatData(this.normalProbability[0]);
     });
+    this.BuildChart();
   }
 
   private ExpressionChance(expression: string) {
     const dicesPlusSeparation: string[] = expression.split("+");
     let chances: Dictionary[] = [];
     let sum: boolean[] = [];
+    let bonus: number = 0;
 
     dicesPlusSeparation.forEach((separation) => {
       let reRoll: number;
       let health: boolean = false;
+
+      if (!separation.includes("d")) {
+        bonus += Number(separation);
+      }
 
       if (separation.includes("-")) {
         separation = separation.replace("-", "");
@@ -103,7 +133,31 @@ export default class Controller {
       chances[0] = Dice.MergeChances(chances[0], chances[index], sum[index]);
     }
 
+    chances[0] = Dice.DeslocateProbability(chances[0], bonus);
+
     return chances[0];
+  }
+
+  private DifficultyClass(
+    dc: number,
+    chances: Dictionary,
+    rpgSystem: string
+  ): number {
+    let successChances: number = 0;
+
+    chances.getKeys().forEach((key: number) => {
+      if (rpgSystem === "gurps" || rpgSystem === "coc") {
+        if (dc >= key) {
+          successChances += chances.get(key);
+        }
+      } else {
+        if (dc <= key) {
+          successChances += chances.get(key);
+        }
+      }
+    });
+
+    return successChances / chances.sum();
   }
 
   private Reroll(separation: string): string[] {
@@ -193,108 +247,23 @@ export default class Controller {
     return [nDice, sides];
   }
 
-  private DictionarytoArray(dictionary: Dictionary): number[] {
-    let array: any[] = [];
-    const min: number = dictionary.min();
-    for (let key = 0; key <= dictionary.max() - min; key++) {
-      array[key] = dictionary.get(key + min);
-    }
-    return array;
-  }
+  private BuildChart() {
+    const graph = new Graph(
+      this.chartData,
+      this.submitData,
+      this.rpgSystem,
+      this.normalProbability,
+      this.damageProbability,
+      this.dc
+    );
 
-  private FormatData(normalProbability: Dictionary) {
-    let labels: number[] = [];
-    for (let i = normalProbability.min(); i <= normalProbability.max(); i++) {
-      labels.push(i);
-    }
-
-    this.chartData = {
-      labels: labels,
-      datasets: [
-        {
-          skipNull: true,
-          label: "100%",
-          backgroundColor: "rgb(20, 152, 222)",
-          borderColor: "rgb(20, 152, 222)",
-          borderRadius: 5,
-          minBarThickness: 30,
-          maxBarThickness: 100,
-          data: this.DictionarytoArray(normalProbability),
-          stack: "Stack 0",
-        },
-      ],
-    };
-    let text = this.submitData[0].dices;
-
-    this.ConfigChart(text, this.chartData, false);
-  }
-
-  private ConfigChart(text: String, chartData: any, reverse: boolean): void {
-    let config = {
-      type: "bar",
-      data: chartData,
-      options: {
-        plugins: {
-          title: {
-            display: true,
-            text: text,
-            color: "white",
-            position: "bottom",
-            padding: 0,
-            font: {
-              size: 16,
-              weight: 100,
-            },
-          },
-          legend: {
-            display: false,
-            labels: {
-              color: "white",
-            },
-            fillStyle: "rgb(20, 152, 222)",
-            strokeStyle: "rgb(20, 152, 222)",
-          },
-        },
-        interaction: {
-          intersect: true,
-        },
-        scales: {
-          x: {
-            reverse: reverse,
-            ticks: {
-              color: "white",
-            },
-            stacked: true,
-          },
-          y: {
-            ticks: {
-              color: "white",
-            },
-            stacked: true,
-          },
-          percentage: {
-            type: "linear",
-            position: "right",
-            ticks: {
-              color: "white",
-            },
-          },
-        },
-      },
-    };
-    this.RenderGraph(config);
-  }
-
-  private RenderGraph(config: any): void {
-    // Destroy old graph
     if (this.chart) {
       this.chart.destroy();
     }
 
-    // Render chart
     this.chart = new Chart(
       document.getElementById("chart") as ChartItem,
-      config
+      graph.getConfig()
     );
   }
 }
