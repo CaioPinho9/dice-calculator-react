@@ -13,14 +13,12 @@ export default class Graph {
   private config: any;
 
   constructor(
-    chartData: { labels: Number[]; datasets: any[] },
     submitData: any[],
     rpgSystem: string,
     normalProbability: Dictionary[],
     damageProbability: any,
     dc: string[]
   ) {
-    this.chartData = chartData;
     this.submitData = submitData;
     this.rpgSystem = rpgSystem;
     this.normalProbability = normalProbability;
@@ -66,8 +64,8 @@ export default class Graph {
 
     datasets.push({
       label: "Damage",
-      backgroundColor: Utils.RandomColor(index === 0),
-      borderColor: Utils.RandomColor(index === 0),
+      backgroundColor: this.DamageColors(index),
+      borderColor: this.DamageColors(index),
       borderRadius: 5,
       minBarThickness: 30,
       maxBarThickness: 100,
@@ -101,6 +99,19 @@ export default class Graph {
       }
     } else {
       return [Utils.RandomColor(index === 0)];
+    }
+    return colors;
+  }
+
+  private DamageColors(index: number) {
+    let colors: string[] = [];
+
+    for (let key = 0; key <= this.damageProbability.max(); key++) {
+      if (key === 0) {
+        colors.push("rgb(255,0,0)");
+      } else {
+        colors.push(Utils.RandomColor(index === 0));
+      }
     }
     return colors;
   }

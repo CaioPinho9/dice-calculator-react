@@ -105,7 +105,6 @@ class DiceCalculator extends Component {
   };
 
   handleSubmit = (e) => {
-    console.log(this.state.formData);
     e.preventDefault();
 
     this.setState(

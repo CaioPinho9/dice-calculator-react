@@ -14,7 +14,9 @@ export default class Dice {
     this.chances = Dice.Chances(nDice, sideDice);
   }
 
-  //Basic probability calculation for n s-dice
+  /**
+   * Basic probability calculation for n s-dice
+   */
   public static Chances(nDice: number, sideDice: number): Dictionary {
     var percent = new Dictionary();
     for (var key = nDice; key <= sideDice * nDice; key++) {
@@ -23,7 +25,9 @@ export default class Dice {
     return Utils.DecimalToChance(percent, sideDice ** nDice);
   }
 
-  //Recalculate probability if number is lower than "reroll"
+  /**
+   * Recalculate probability if number is lower than "reroll"
+   */
   public static ChancesReroll(
     nDice: number,
     sideDice: number,
@@ -65,6 +69,9 @@ export default class Dice {
     return chances;
   }
 
+  /**
+   * Advantage and disadvantage
+   */
   public static AdvantageChances(
     nDice: number,
     sideDice: number,
@@ -153,7 +160,9 @@ export default class Dice {
     return chancesDictionary;
   }
 
-  //Unify two probabilities curves
+  /**
+   * Unify two probabilities curves
+   */
   public static MergeChances(
     chances1: Dictionary,
     chances2: Dictionary,
@@ -173,7 +182,9 @@ export default class Dice {
     return chances;
   }
 
-  //Unify two probabilities curves
+  /**
+   * Unify two probabilities curves
+   */
   public static SumChances(
     chances1: Dictionary,
     chances2: Dictionary,
@@ -191,7 +202,9 @@ export default class Dice {
     return chances;
   }
 
-  //Move the probability curve horizontally
+  /**
+   * Move the probability curve horizontally
+   */
   public static DeslocateProbability(
     probOld: Dictionary,
     value: number

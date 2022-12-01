@@ -70,9 +70,11 @@ export default class Utils {
     return decimals;
   }
 
+  //Create a random rgb color
   public static RandomColor(blue: boolean): string {
     let r: number, g: number, b: number;
     if (blue) {
+      //Default blue color
       return `rgb(20, 152, 222)`;
     } else {
       r = Math.random() * 255;
