@@ -1,4 +1,6 @@
 // @ts-ignore
+import Controller from "./Controller.ts";
+// @ts-ignore
 import Chances from "./types/Chances.ts";
 // @ts-ignore
 import Utils from "./Utils.ts";
@@ -77,6 +79,7 @@ export default class Graph {
 
   private backgroundColors(index: number) {
     let colors: string[] = [];
+    let color: string = Utils.randomColor(index === 0);
     if (this.dc[index] !== "" && this.dc[index] !== "0") {
       for (
         let key = this.normalProbability[index].min();
@@ -87,18 +90,18 @@ export default class Graph {
           if (key < Number(this.dc[index])) {
             colors.push("rgb(255,0,0)");
           } else {
-            colors.push(Utils.randomColor(index === 0));
+            colors.push(color);
           }
         } else {
           if (key > Number(this.dc[index])) {
             colors.push("rgb(255,0,0)");
           } else {
-            colors.push(Utils.randomColor(index === 0));
+            colors.push(color);
           }
         }
       }
     } else {
-      return [Utils.randomColor(index === 0)];
+      return [color];
     }
     return colors;
   }
@@ -118,8 +121,43 @@ export default class Graph {
   }
 
   private text() {
-    let text = "";
-    return text;
+    let result: string[] = [];
+    this.submitData.forEach((line) => {
+      let text = "";
+      if (line.dices === "") {
+        const split = line.dices.split("d");
+        const rpgDefault = Controller.rpgDefault(
+          split[0],
+          split[1],
+          this.rpgSystem
+        );
+        text += rpgDefault[0] + "d" + rpgDefault[1];
+      } else {
+        text += line.dices;
+      }
+
+      if (this.rpgSystem !== "gurps" && line.bonus !== "") {
+        text += " + " + line.bonus;
+      }
+
+      if (line.dc !== "") {
+        if (this.rpgSystem === "gurps") {
+          text += " NH" + line.dc + " + " + line.bonus;
+        } else {
+          text += " DC" + line.dc;
+        }
+      }
+
+      if (line.damage !== "") {
+        text += " Dam:" + line.damage;
+      }
+
+      if (line.crit !== "") {
+        text += " + " + line.crit;
+      }
+      result.push(text);
+    });
+    return result;
   }
 
   private formatData() {
@@ -151,7 +189,7 @@ export default class Graph {
     this.configChart(text, this.chartData, false);
   }
 
-  private configChart(text: String, chartData: any, reverse: boolean): void {
+  private configChart(text: String[], chartData: any, reverse: boolean): void {
     this.config = {
       type: "bar",
       data: chartData,

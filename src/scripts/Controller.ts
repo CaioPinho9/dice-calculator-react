@@ -251,7 +251,7 @@ export default class Controller {
     } else {
       return false;
     }
-    const check: string[] = this.rpgDefault(nDice, sides);
+    const check: string[] = Controller.rpgDefault(nDice, sides, this.rpgSystem);
     nDice = check[0];
     sides = check[1];
 
@@ -278,7 +278,7 @@ export default class Controller {
     nDice = splited[0];
     sides = splited[1];
 
-    const check: string[] = this.rpgDefault(nDice, sides);
+    const check: string[] = Controller.rpgDefault(nDice, sides, this.rpgSystem);
     nDice = check[0];
     sides = check[1];
 
@@ -294,16 +294,16 @@ export default class Controller {
   /**
    * If nDice or sides is empty, return default value of the system
    */
-  private rpgDefault(nDice: string, sides: string): string[] {
+  private static rpgDefault(nDice: string, sides: string, rpgSystem: string): string[] {
     if (nDice === "0" || nDice === "") {
-      if (this.rpgSystem === "gurps") {
+      if (rpgSystem === "gurps") {
         nDice = "3";
       } else {
         nDice = "1";
       }
     }
     if (sides === "0" || sides === "") {
-      switch (this.rpgSystem) {
+      switch (rpgSystem) {
         case "gurps":
           sides = "6";
           break;
