@@ -109,7 +109,7 @@ class DiceCalculator extends Component {
 
     this.setState(
       this.state.controller,
-      this.state.controller.Interpreter(
+      this.state.controller.interpreter(
         this.state.formData,
         this.props.rpgSystem
       )

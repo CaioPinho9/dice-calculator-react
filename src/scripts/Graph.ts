@@ -24,10 +24,10 @@ export default class Graph {
     this.normalProbability = normalProbability;
     this.damageProbability = damageProbability;
     this.dc = dc;
-    this.FormatData();
+    this.formatData();
   }
 
-  private Labels(): Set<number> {
+  private labels(): Set<number> {
     let labels = new Set<number>();
     this.normalProbability.forEach((element): void => {
       for (let i = element.min(); i <= element.max(); i++) {
@@ -45,15 +45,15 @@ export default class Graph {
     return labels;
   }
 
-  private Datasets() {
+  private datasets() {
     let datasets = [{}];
     let index = 0;
 
     for (; index < this.normalProbability.length; index++) {
       datasets.push({
         label: "Test " + (index + 1),
-        backgroundColor: this.BackgroundColors(index),
-        borderColor: this.BackgroundColors(index),
+        backgroundColor: this.backgroundColors(index),
+        borderColor: this.backgroundColors(index),
         borderRadius: 5,
         minBarThickness: 30,
         maxBarThickness: 100,
@@ -64,8 +64,8 @@ export default class Graph {
 
     datasets.push({
       label: "Damage",
-      backgroundColor: this.DamageColors(index),
-      borderColor: this.DamageColors(index),
+      backgroundColor: this.damageColors(index),
+      borderColor: this.damageColors(index),
       borderRadius: 5,
       minBarThickness: 30,
       maxBarThickness: 100,
@@ -75,9 +75,9 @@ export default class Graph {
     return datasets;
   }
 
-  private BackgroundColors(index: number) {
+  private backgroundColors(index: number) {
     let colors: string[] = [];
-    if (this.dc[index] !== "") {
+    if (this.dc[index] !== "" && this.dc[index] !== "0") {
       for (
         let key = this.normalProbability[index].min();
         key <= this.normalProbability[index].max();
@@ -87,25 +87,25 @@ export default class Graph {
           if (key < Number(this.dc[index])) {
             colors.push("rgb(255,0,0)");
           } else {
-            colors.push(Utils.RandomColor(index === 0));
+            colors.push(Utils.randomColor(index === 0));
           }
         } else {
           if (key > Number(this.dc[index])) {
             colors.push("rgb(255,0,0)");
           } else {
-            colors.push(Utils.RandomColor(index === 0));
+            colors.push(Utils.randomColor(index === 0));
           }
         }
       }
     } else {
-      return [Utils.RandomColor(index === 0)];
+      return [Utils.randomColor(index === 0)];
     }
     return colors;
   }
 
-  private DamageColors(index: number) {
+  private damageColors(index: number) {
     let colors: string[] = [];
-    let color: string = Utils.RandomColor(index === 0);
+    let color: string = Utils.randomColor(index === 0);
 
     for (let key = 0; key <= this.damageProbability.max(); key++) {
       if (key === 0) {
@@ -122,8 +122,8 @@ export default class Graph {
     return text;
   }
 
-  private FormatData() {
-    let labels = this.Labels();
+  private formatData() {
+    let labels = this.labels();
 
     //Same length data
     Array.from(labels).forEach((label) => {
@@ -137,7 +137,7 @@ export default class Graph {
       }
     });
 
-    let datasets = this.Datasets();
+    let datasets = this.datasets();
 
     this.chartData = {
       labels: Array.from(labels).sort(function (a, b) {
@@ -148,10 +148,10 @@ export default class Graph {
 
     const text = this.text();
 
-    this.ConfigChart(text, this.chartData, false);
+    this.configChart(text, this.chartData, false);
   }
 
-  private ConfigChart(text: String, chartData: any, reverse: boolean): void {
+  private configChart(text: String, chartData: any, reverse: boolean): void {
     this.config = {
       type: "bar",
       data: chartData,

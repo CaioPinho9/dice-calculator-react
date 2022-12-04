@@ -14,7 +14,7 @@ export default class Controller {
   public resultDamage: Chances = new Chances();
   public dc: string[] = [];
 
-  public Interpreter(formsData: any[], rpgSystem: string) {
+  public interpreter(formsData: any[], rpgSystem: string) {
     this.rpgSystem = rpgSystem;
     //Refresh
     this.resultTests = [];
@@ -49,10 +49,10 @@ export default class Controller {
         }
       }
 
-      let expressionChance = this.ExpressionChance(dices);
+      let expressionChance = this.expressionChance(dices);
 
       if (rpgSystem !== "gurps") {
-        expressionChance = Dice.DeslocateProbability(
+        expressionChance = Dice.deslocateProbability(
           expressionChance,
           Number(line.bonus)
         );
@@ -70,13 +70,13 @@ export default class Controller {
               ? Number(line.dc) + Number(line.bonus)
               : Number(line.dc);
           //Success probability
-          const success = this.SuccessProbability(
+          const success = this.successProbability(
             dc,
             expressionChance,
             rpgSystem
           );
           //Damage chance
-          const damageChance = this.ExpressionChance(damage);
+          const damageChance = this.expressionChance(damage);
 
           //Chance of zero damage
           damageChance.set(
@@ -88,7 +88,7 @@ export default class Controller {
           if (this.resultDamage.size() === 0) {
             this.resultDamage = damageChance;
           } else {
-            this.resultDamage = Dice.MergeChances(
+            this.resultDamage = Dice.mergeChances(
               this.resultDamage,
               damageChance
             );
@@ -101,7 +101,7 @@ export default class Controller {
         this.resultTests.push(dict);
       }
     });
-    this.BuildChart(formsData, rpgSystem);
+    this.buildChart(formsData, rpgSystem);
   }
 
   /**
@@ -109,7 +109,7 @@ export default class Controller {
    * @param expression ""
    * @returns Chances
    */
-  private ExpressionChance(expression: string) {
+  private expressionChance(expression: string) {
     const dicesPlusSeparation: string[] = expression.split("+");
     let chances: Chances[] = [];
     let resultChances: Chances = new Chances();
@@ -139,7 +139,7 @@ export default class Controller {
 
         //Check if is a reroll calculation
         if (separation.includes("r")) {
-          const rerollArray: string[] = this.Reroll(separation);
+          const rerollArray: string[] = this.reRoll(separation);
           separation = rerollArray[0];
           reRoll = Number(rerollArray[1]);
         } else {
@@ -152,10 +152,10 @@ export default class Controller {
           separation.includes("~")
         ) {
           //Advantage/disadvantage calculation
-          chances.push(this.Advantage(separation, reRoll));
+          chances.push(this.advantage(separation, reRoll));
         } else {
           //Normal calculation
-          chances.push(this.NormalChance(separation, reRoll, hitDices));
+          chances.push(this.normalChance(separation, reRoll, hitDices));
         }
       } else {
         bonus += Number(separation);
@@ -165,7 +165,7 @@ export default class Controller {
     //Unify all chances
     resultChances = chances[0];
     for (let index = 1; index < chances.length; index++) {
-      resultChances = Dice.MergeChances(
+      resultChances = Dice.mergeChances(
         resultChances,
         chances[index],
         sum[index]
@@ -173,7 +173,7 @@ export default class Controller {
     }
 
     //Sum the bonus
-    resultChances = Dice.DeslocateProbability(resultChances, bonus);
+    resultChances = Dice.deslocateProbability(resultChances, bonus);
 
     return resultChances;
   }
@@ -184,7 +184,7 @@ export default class Controller {
    * @param rpgSystem In gurps and coc, the lower is better, while in dnd the higher is better
    * @returns Success probability
    */
-  private SuccessProbability(
+  private successProbability(
     dc: number,
     chances: Chances,
     rpgSystem: string
@@ -211,7 +211,7 @@ export default class Controller {
   /**
    * @returns dice and reroll separated
    */
-  private Reroll(separation: string): string[] {
+  private reRoll(separation: string): string[] {
     const splited: string[] = separation.split("r");
     let dice: string = splited[0];
     let reRoll: string = splited[1];
@@ -222,7 +222,7 @@ export default class Controller {
    * @param separation Ex: 2>d20, 4d6~1
    * @returns Chances
    */
-  private Advantage(separation: string, reRoll: number) {
+  private advantage(separation: string, reRoll: number) {
     let nDice: string;
     let sides: string;
     let positive: boolean = true;
@@ -255,7 +255,7 @@ export default class Controller {
     nDice = check[0];
     sides = check[1];
 
-    return Dice.AdvantageChances(
+    return Dice.advantageChances(
       Number(nDice),
       Number(sides),
       positive,
@@ -271,7 +271,7 @@ export default class Controller {
    * @param hitDices Hitdices calcultation always reroll
    * @returns Chances
    */
-  private NormalChance(separation: string, reRoll: number, hitDices: boolean) {
+  private normalChance(separation: string, reRoll: number, hitDices: boolean) {
     let nDice: string;
     let sides: string;
     const splited = separation.split("d");
@@ -283,11 +283,11 @@ export default class Controller {
     sides = check[1];
 
     if (reRoll === 0) {
-      return Dice.Chances(nDice, sides);
+      return Dice.chances(nDice, sides);
     } else {
-      //Reroll
+      //reRoll
       //hitDices checks always reroll ones
-      return Dice.ChancesReroll(nDice, sides, reRoll, hitDices);
+      return Dice.chancesReroll(nDice, sides, reRoll, hitDices);
     }
   }
 
@@ -321,7 +321,7 @@ export default class Controller {
   /**
    * Config and create chart
    */
-  private BuildChart(formsData: any[], rpgSystem: string) {
+  private buildChart(formsData: any[], rpgSystem: string) {
     //Config chart
     const graph = new Graph(
       formsData,

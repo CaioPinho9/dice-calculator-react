@@ -13,16 +13,16 @@ export default class Dice {
   constructor(nDice: number, sideDice: number) {
     this.nDice = nDice;
     this.sideDice = sideDice;
-    this.chances = Dice.Chances(nDice, sideDice);
+    this.chances = Dice.chances(nDice, sideDice);
   }
 
   /**
    * Basic probability calculation for n s-dice
    */
-  public static Chances(nDice: number, sideDice: number): Chances {
+  public static chances(nDice: number, sideDice: number): Chances {
     var decimal = new Decimals();
     for (var key = nDice; key <= sideDice * nDice; key++) {
-      decimal.set(key, this.ExactSumProbability(key, nDice, sideDice));
+      decimal.set(key, this.exactSumProbability(key, nDice, sideDice));
     }
     return decimal.toChance(sideDice ** nDice);
   }
@@ -30,7 +30,7 @@ export default class Dice {
   /**
    * Recalculate probability if number is lower than "reroll"
    */
-  public static ChancesReroll(
+  public static chancesReroll(
     nDice: number,
     sideDice: number,
     reroll: number,
@@ -43,7 +43,7 @@ export default class Dice {
         var chancesReroll = new Chances();
         chancesReroll.set(key, 1);
         if (key <= reroll) {
-          chancesReroll = Dice.Chances(1, sideDice);
+          chancesReroll = Dice.chances(1, sideDice);
           if (rerollAlways) {
             // eslint-disable-next-line
             chancesReroll.getKeys().forEach((key: number) => {
@@ -56,7 +56,7 @@ export default class Dice {
         if (chancesRerolled.size() === 0) {
           chancesRerolled = chancesReroll;
         } else {
-          chancesRerolled = Dice.SumChances(
+          chancesRerolled = Dice.sumChances(
             chancesRerolled,
             chancesReroll,
             true
@@ -66,7 +66,7 @@ export default class Dice {
       if (chances.size() === 0) {
         chances = chancesRerolled;
       } else {
-        chances = Dice.MergeChances(chances, chancesRerolled, true);
+        chances = Dice.mergeChances(chances, chancesRerolled, true);
       }
     }
     return chances;
@@ -75,7 +75,7 @@ export default class Dice {
   /**
    * Advantage and disadvantage
    */
-  public static AdvantageChances(
+  public static advantageChances(
     nDice: number,
     sideDice: number,
     advantage: boolean,
@@ -166,7 +166,7 @@ export default class Dice {
   /**
    * Unify two probabilities curves
    */
-  public static MergeChances(
+  public static mergeChances(
     chances1: Chances,
     chances2: Chances,
     //Sum = true, minus = false
@@ -188,7 +188,7 @@ export default class Dice {
   /**
    * Unify two probabilities curves
    */
-  public static SumChances(
+  public static sumChances(
     chances1: Chances,
     chances2: Chances,
     //Sum = true, minus = false
@@ -208,7 +208,7 @@ export default class Dice {
   /**
    * Move the probability curve horizontally
    */
-  public static DeslocateProbability(probOld: Chances, value: number): Chances {
+  public static deslocateProbability(probOld: Chances, value: number): Chances {
     var probNew = new Chances();
 
     probOld.getKeys().forEach((key: number) => {
@@ -228,7 +228,7 @@ export default class Dice {
   }
 
   //Find the probability of one number in n s-dices
-  public static ExactSumProbability(
+  public static exactSumProbability(
     sum: number,
     nDices: number,
     sideDice: number
@@ -237,8 +237,8 @@ export default class Dice {
     for (var i = 0; i <= Math.floor((sum - nDices) / sideDice); i++) {
       somatory +=
         (-1) ** i *
-        Utils.Permutation(nDices, i) *
-        Utils.Permutation(sum - sideDice * i - 1, nDices - 1);
+        Utils.permutation(nDices, i) *
+        Utils.permutation(sum - sideDice * i - 1, nDices - 1);
     }
     return (1 / sideDice ** nDices) * somatory;
   }
