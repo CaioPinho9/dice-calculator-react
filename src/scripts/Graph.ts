@@ -1,5 +1,5 @@
 // @ts-ignore
-import Dictionary from "./Dictionary.ts";
+import Chances from "./types/Chances.ts";
 // @ts-ignore
 import Utils from "./Utils.ts";
 
@@ -7,16 +7,16 @@ export default class Graph {
   private chartData: { labels: Number[]; datasets: any[] };
   private submitData: any[];
   private rpgSystem: string;
-  private normalProbability: Dictionary[] = [];
-  private damageProbability: Dictionary = new Dictionary();
+  private normalProbability: Chances[] = [];
+  private damageProbability: Chances = new Chances();
   private dc: string[];
   private config: any;
 
   constructor(
     submitData: any[],
     rpgSystem: string,
-    normalProbability: Dictionary[],
-    damageProbability: any,
+    normalProbability: Chances[],
+    damageProbability: Chances,
     dc: string[]
   ) {
     this.submitData = submitData;
@@ -57,7 +57,7 @@ export default class Graph {
         borderRadius: 5,
         minBarThickness: 30,
         maxBarThickness: 100,
-        data: Utils.ChanceToPercent(this.normalProbability[index]).toArray(),
+        data: this.normalProbability[index].toPercent().toArray(),
         stack: "Stack " + index,
       });
     }
@@ -69,7 +69,7 @@ export default class Graph {
       borderRadius: 5,
       minBarThickness: 30,
       maxBarThickness: 100,
-      data: Utils.ChanceToPercent(this.damageProbability).toArray(),
+      data: this.damageProbability.toPercent().toArray(),
       stack: "Stack " + index,
     });
     return datasets;
@@ -105,15 +105,21 @@ export default class Graph {
 
   private DamageColors(index: number) {
     let colors: string[] = [];
+    let color: string = Utils.RandomColor(index === 0);
 
     for (let key = 0; key <= this.damageProbability.max(); key++) {
       if (key === 0) {
         colors.push("rgb(255,0,0)");
       } else {
-        colors.push(Utils.RandomColor(index === 0));
+        colors.push(color);
       }
     }
     return colors;
+  }
+
+  private text() {
+    let text = "";
+    return text;
   }
 
   private FormatData() {
@@ -140,12 +146,7 @@ export default class Graph {
       datasets: datasets,
     };
 
-    let text =
-      this.submitData[0].dices +
-      " " +
-      this.submitData[0].bonus +
-      " DC" +
-      this.submitData[0].dc;
+    const text = this.text();
 
     this.ConfigChart(text, this.chartData, false);
   }

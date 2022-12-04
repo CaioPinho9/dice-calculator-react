@@ -1,10 +1,12 @@
 // @ts-ignore
-import Dictionary from "./Dictionary.ts";
+import Chances from "./types/Chances.ts";
 // @ts-ignore
 import Utils from "./Utils.ts";
+// @ts-ignore
+import Decimals from "./types/Decimals.ts";
 
 export default class Dice {
-  private chances: Dictionary;
+  private chances: Chances;
   private sideDice: number;
   private nDice: number;
 
@@ -17,12 +19,12 @@ export default class Dice {
   /**
    * Basic probability calculation for n s-dice
    */
-  public static Chances(nDice: number, sideDice: number): Dictionary {
-    var percent = new Dictionary();
+  public static Chances(nDice: number, sideDice: number): Chances {
+    var decimal = new Decimals();
     for (var key = nDice; key <= sideDice * nDice; key++) {
-      percent.set(key, Utils.ExactSumProbability(key, nDice, sideDice));
+      decimal.set(key, this.ExactSumProbability(key, nDice, sideDice));
     }
-    return Utils.DecimalToChance(percent, sideDice ** nDice);
+    return decimal.toChance(sideDice ** nDice);
   }
 
   /**
@@ -33,16 +35,17 @@ export default class Dice {
     sideDice: number,
     reroll: number,
     rerollAlways: boolean
-  ): Dictionary {
-    var chances = new Dictionary();
+  ): Chances {
+    var chances = new Chances();
     for (var n = 1; n <= nDice; n++) {
-      var chancesRerolled = new Dictionary();
+      var chancesRerolled = new Chances();
       for (var key = 1; key <= sideDice; key++) {
-        var chancesReroll = new Dictionary();
+        var chancesReroll = new Chances();
         chancesReroll.set(key, 1);
         if (key <= reroll) {
           chancesReroll = Dice.Chances(1, sideDice);
           if (rerollAlways) {
+            // eslint-disable-next-line
             chancesReroll.getKeys().forEach((key: number) => {
               if (key <= reroll) {
                 chancesReroll.removeItem(key);
@@ -78,7 +81,7 @@ export default class Dice {
     advantage: boolean,
     nKeep: number,
     reRoll: boolean
-  ): Dictionary {
+  ): Chances {
     var advantageArray = new Array(nDice);
     var chancesArray = new Array(sideDice + 1);
 
@@ -153,7 +156,7 @@ export default class Dice {
       }
     }
     //Convert array to dictionary of chances
-    var chancesDictionary = new Dictionary();
+    var chancesDictionary = new Chances();
     chancesArray.forEach((value: number, key: number) => {
       chancesDictionary.set(key, value);
     });
@@ -164,12 +167,12 @@ export default class Dice {
    * Unify two probabilities curves
    */
   public static MergeChances(
-    chances1: Dictionary,
-    chances2: Dictionary,
+    chances1: Chances,
+    chances2: Chances,
     //Sum = true, minus = false
     sum: boolean
-  ): Dictionary {
-    var chances = new Dictionary();
+  ): Chances {
+    var chances = new Chances();
 
     chances1.getKeys().forEach((key1: number) => {
       chances2.getKeys().forEach((key2: number) => {
@@ -186,12 +189,12 @@ export default class Dice {
    * Unify two probabilities curves
    */
   public static SumChances(
-    chances1: Dictionary,
-    chances2: Dictionary,
+    chances1: Chances,
+    chances2: Chances,
     //Sum = true, minus = false
     sum: boolean
-  ): Dictionary {
-    var chances = new Dictionary();
+  ): Chances {
+    var chances = new Chances();
 
     chances1.getKeys().forEach((key1: number) => {
       chances.add(key1, chances1.get(key1));
@@ -205,11 +208,8 @@ export default class Dice {
   /**
    * Move the probability curve horizontally
    */
-  public static DeslocateProbability(
-    probOld: Dictionary,
-    value: number
-  ): Dictionary {
-    var probNew = new Dictionary();
+  public static DeslocateProbability(probOld: Chances, value: number): Chances {
+    var probNew = new Chances();
 
     probOld.getKeys().forEach((key: number) => {
       probNew.add(key + value, probOld.get(key));
@@ -217,7 +217,7 @@ export default class Dice {
     return probNew;
   }
 
-  public getChances(): Dictionary {
+  public getChances(): Chances {
     return this.chances;
   }
   public getSide(): number {
@@ -225,5 +225,21 @@ export default class Dice {
   }
   public getNDice(): number {
     return this.nDice;
+  }
+
+  //Find the probability of one number in n s-dices
+  public static ExactSumProbability(
+    sum: number,
+    nDices: number,
+    sideDice: number
+  ): number {
+    var somatory = 0;
+    for (var i = 0; i <= Math.floor((sum - nDices) / sideDice); i++) {
+      somatory +=
+        (-1) ** i *
+        Utils.Permutation(nDices, i) *
+        Utils.Permutation(sum - sideDice * i - 1, nDices - 1);
+    }
+    return (1 / sideDice ** nDices) * somatory;
   }
 }

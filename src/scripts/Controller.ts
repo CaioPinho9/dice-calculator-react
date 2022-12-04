@@ -4,21 +4,21 @@ import Graph from "./Graph.ts";
 // @ts-ignore
 import Dice from "./Dice.ts";
 // @ts-ignore
-import Dictionary from "./Dictionary.ts";
+import Chances from "./types/Chances.ts";
 
 export default class Controller {
   //Graph object
   public chart: Chart;
   public rpgSystem: string;
-  public testChances: Dictionary[] = [];
-  public damageChances: Dictionary = new Dictionary();
+  public resultTests: Chances[] = [];
+  public resultDamage: Chances = new Chances();
   public dc: string[] = [];
 
   public Interpreter(formsData: any[], rpgSystem: string) {
     this.rpgSystem = rpgSystem;
     //Refresh
-    this.testChances = [];
-    this.damageChances = new Dictionary();
+    this.resultTests = [];
+    this.resultDamage = new Chances();
 
     //Process each line from forms
     formsData.forEach((line) => {
@@ -61,7 +61,7 @@ export default class Controller {
       if (dices.includes("d")) {
         if (line.damage === "") {
           //Normal test
-          this.testChances.push(expressionChance);
+          this.resultTests.push(expressionChance);
         } else {
           //Damage test
           //Gurps dc/nh uses bonus
@@ -84,21 +84,21 @@ export default class Controller {
             Math.round((damageChance.sum() * (1 - success)) / success)
           );
 
-          //Merge the damage with damageChances
-          if (this.damageChances.size() === 0) {
-            this.damageChances = damageChance;
+          //Merge the damage with resultDamage
+          if (this.resultDamage.size() === 0) {
+            this.resultDamage = damageChance;
           } else {
-            this.damageChances = Dice.MergeChances(
-              this.damageChances,
+            this.resultDamage = Dice.MergeChances(
+              this.resultDamage,
               damageChance
             );
           }
         }
       } else {
         //Number only
-        let dict = new Dictionary();
+        let dict = new Chances();
         dict.set(Number(dices), 1);
-        this.testChances.push(dict);
+        this.resultTests.push(dict);
       }
     });
     this.BuildChart(formsData, rpgSystem);
@@ -111,8 +111,8 @@ export default class Controller {
    */
   private ExpressionChance(expression: string) {
     const dicesPlusSeparation: string[] = expression.split("+");
-    let chances: Dictionary[] = [];
-    let resultChances: Dictionary = new Dictionary();
+    let chances: Chances[] = [];
+    let resultChances: Chances = new Chances();
     let sum: boolean[] = [];
     let bonus: number = 0;
 
@@ -186,7 +186,7 @@ export default class Controller {
    */
   private SuccessProbability(
     dc: number,
-    chances: Dictionary,
+    chances: Chances,
     rpgSystem: string
   ): number {
     let successChances: number = 0;
@@ -326,8 +326,8 @@ export default class Controller {
     const graph = new Graph(
       formsData,
       rpgSystem,
-      this.testChances,
-      this.damageChances,
+      this.resultTests,
+      this.resultDamage,
       this.dc
     );
 
