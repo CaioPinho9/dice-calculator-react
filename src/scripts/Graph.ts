@@ -135,7 +135,7 @@ export default class Graph {
         },
         scales: {
           x: {
-            reverse: reverse,
+            reverse: this.rpgSystem !== "dnd",
             ticks: {
               blue: "black",
             },

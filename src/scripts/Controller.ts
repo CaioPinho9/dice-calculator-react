@@ -13,11 +13,13 @@ export default class Controller {
   public chart: Chart;
   public rpgSystem: string;
   public tests: Test[] = [];
+  public legends: any[] = [];
 
   public interpreter(formsData: any[], rpgSystem: string) {
     this.rpgSystem = rpgSystem;
     //Refresh
     this.tests = [];
+    this.legends = [];
 
     let criticalData: { critical: Chances; probability: number }[] = [];
 
@@ -80,15 +82,15 @@ export default class Controller {
         );
       }
 
+      this.tests[testIndex].normal = expressionChance;
       //Normal test
       if (!this.tests[testIndex].hasDamage()) {
-        this.tests[testIndex].normal = expressionChance;
         return;
       }
 
       //Damage test
       //Success probability
-      const success = this.successProbability(dc, expressionChance, rpgSystem);
+      const success = this.tests[testIndex].successProbability();
       //Damage chance
       let damageChance = this.expressionChance(damage);
 
@@ -109,7 +111,7 @@ export default class Controller {
       if (critical !== "") {
         criticalData.push({
           critical: this.expressionChance(critical),
-          probability: this.criticalProbability(expressionChance, dc),
+          probability: this.tests[testIndex].criticalProbability(),
         });
       }
     });
@@ -132,6 +134,18 @@ export default class Controller {
           data.critical.sum()
       );
 
+      let removeCritical = data.probability * this.tests[index].damage.sum();
+      removeCritical *= -1 / (this.tests[index].damage.size() - 1);
+
+      this.tests[index].damage.getKeys().forEach((key: number) => {
+        if (key !== 0) {
+          this.tests[index].damage.set(
+            key,
+            this.tests[index].damage.get(key) + removeCritical
+          );
+        }
+      });
+
       if (this.tests[index].critical.size() === 0) {
         this.tests[index].critical = data.critical;
       } else {
@@ -144,6 +158,11 @@ export default class Controller {
     });
 
     this.buildChart(formsData, rpgSystem);
+
+    this.tests.forEach((test) => {
+      this.legends.push(test.legend());
+      console.log(test.legend());
+    });
   }
 
   /**
@@ -336,59 +355,6 @@ export default class Controller {
       }
     }
     return [nDice, sides];
-  }
-
-  /**
-   * @param dc The number used to say where is the success
-   * @param chances Chances of each key
-   * @param rpgSystem In gurps and coc, the lower is better, while in dnd the higher is better
-   * @returns Success probability
-   */
-  private successProbability(
-    dc: number,
-    chances: Chances,
-    rpgSystem: string
-  ): number {
-    let successChances: number = 0;
-
-    //Check if key is a success, depending on the system
-    chances.getKeys().forEach((key: number) => {
-      if (rpgSystem === "gurps" || rpgSystem === "coc") {
-        if (dc >= key) {
-          successChances += chances.get(key);
-        }
-      } else {
-        if (dc <= key) {
-          successChances += chances.get(key);
-        }
-      }
-    });
-
-    //Success probability
-    return successChances / chances.sum();
-  }
-
-  private criticalProbability(expression: Chances, dc: number): number {
-    let crit: number = 0;
-    if (this.rpgSystem === "dnd") {
-      crit = expression.get(20);
-    } else if (this.rpgSystem === "coc") {
-      expression.getKeys().forEach((key: number) => {
-        if (key <= dc / 5) {
-          crit += expression.get(key);
-        }
-      });
-    } else {
-      expression.getKeys().forEach((key: number) => {
-        if (key <= dc - 10 || key <= 4) {
-          crit += expression.get(key);
-        }
-      });
-    }
-    crit *= 1 / expression.sum();
-    console.log(crit);
-
-    return crit;
   }
 
   /**

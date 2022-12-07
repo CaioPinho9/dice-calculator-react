@@ -11,7 +11,7 @@ class DiceCalculator extends Component {
       formQnt: 1,
       formData: [],
       forms: [],
-      legend: [],
+      legends: [],
       controller: new Controller(),
     };
   }
@@ -52,6 +52,7 @@ class DiceCalculator extends Component {
             value="-"
           />
           <div className="break"></div>
+          {this.legends()}
           <canvas id="chart" className="Calculator-chart"></canvas>
         </form>
       </div>
@@ -119,7 +120,24 @@ class DiceCalculator extends Component {
       )
     );
 
+    this.setState({ legends: this.state.controller.legends });
+
     document.getElementById("canvas").style.display = "block";
+  };
+
+  legends = () => {
+    let rows = [];
+    let key = 0;
+    this.state.legends.forEach((legend) => {
+      let collumns = [];
+      legend.forEach((collumn) => {
+        collumns.push(<p key={key}>{collumn}</p>);
+      });
+      key++;
+      collumns.push(<br />);
+      rows.push(<div>{collumns}</div>);
+    });
+    return <div>{rows}</div>;
   };
 }
 
