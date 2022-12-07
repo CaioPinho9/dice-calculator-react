@@ -1,216 +1,20 @@
 // @ts-ignore
-import Color from "./Color.ts";
-// @ts-ignore
 import Controller from "./Controller.ts";
 // @ts-ignore
 import Test from "./Test.ts";
 
 export default class Graph {
-  private chartData: { labels: Number[]; datasets: any[] };
-  private submitData: any[];
+  private graphData: { labels: Number[]; datasets: any[] };
+  private formsData: any[];
   private rpgSystem: string;
   private tests: Test[];
   private config: any;
 
-  constructor(submitData: any[], rpgSystem: string, tests: Test[]) {
-    this.submitData = submitData;
+  constructor(formsData: any[], rpgSystem: string, tests: Test[]) {
+    this.formsData = formsData;
     this.rpgSystem = rpgSystem;
     this.tests = tests;
     this.formatData();
-  }
-
-  private labels(): Set<number> {
-    let labels = new Set<number>();
-    this.tests.forEach((test): void => {
-      for (let i = test.normal.min(); i <= test.normal.max(); i++) {
-        labels.add(i);
-      }
-      if (test.damage.sum() !== 0) {
-        for (let i: number = test.damage.min(); i <= test.damage.max(); i++) {
-          labels.add(i);
-        }
-      }
-      if (test.critical.sum() !== 0) {
-        for (
-          let i: number = test.critical.min();
-          i <= test.critical.max();
-          i++
-        ) {
-          labels.add(i);
-        }
-      }
-    });
-
-    return labels;
-  }
-
-  private datasets() {
-    let datasets: any[] = [];
-    let index = 0;
-
-    for (; index < this.tests.length; index++) {
-      if (!this.tests[index].extended) {
-        datasets.push({
-          label: "Test " + (index + 1),
-          backgroundColor: this.backgroundColors(index),
-          borderColor: this.backgroundColors(index),
-          borderRadius: 5,
-          minBarThickness: 30,
-          maxBarThickness: 100,
-          data: this.tests[index].normal.toPercent().toArray(),
-          stack: "Stack " + index,
-        });
-      } else {
-        datasets.push({
-          label: "Damage",
-          backgroundColor: this.backgroundColors(index),
-          borderColor: this.backgroundColors(index),
-          borderRadius: 5,
-          minBarThickness: 30,
-          maxBarThickness: 100,
-          data: this.tests[index].damage.toPercent().toArray(),
-          stack: "Stack " + index,
-        });
-
-        if (this.tests[index].critical.sum() !== 0) {
-          datasets.push({
-            label: "Critical",
-            backgroundColor: index === 0 ? Color.green : Color.randomGreen(),
-            borderColor: index === 0 ? Color.green : Color.randomGreen(),
-            borderRadius: 5,
-            minBarThickness: 30,
-            maxBarThickness: 100,
-            data: this.tests[index].critical
-              .toPercent(this.tests[index].damage)
-              .toArray(),
-            stack: "Stack " + index,
-          });
-        }
-      }
-    }
-
-    return datasets;
-  }
-
-  private backgroundColors(index: number) {
-    let colors: string[] = [];
-    const green: string = index === 0 ? Color.green : Color.randomGreen();
-    const blue: string = index === 0 ? Color.blue : Color.randomBlue();
-    const yellow: string = index === 0 ? Color.yellow : Color.randomYellow();
-    const red: string = index === 0 ? Color.red : Color.randomRed();
-    let normal: boolean =
-      this.submitData[index].dices === "" ||
-      (this.submitData[index].dices === "3d6" && this.rpgSystem === "gurps") ||
-      (this.submitData[index].dices === "1d100" && this.rpgSystem === "coc") ||
-      (this.submitData[index].dices.includes("d20") &&
-        this.rpgSystem === "dnd");
-
-    if (!this.tests[index].extended) {
-      if (this.tests[index].dc !== 0) {
-        for (
-          let key = this.tests[index].normal.min();
-          key <= this.tests[index].normal.max();
-          key++
-        ) {
-          if (this.rpgSystem === "dnd") {
-            if (normal) {
-              if (key < this.tests[index].dc) {
-                colors.push(red);
-              } else if (key < 20) {
-                colors.push(blue);
-              } else {
-                colors.push(green);
-              }
-            } else {
-              if (key < this.tests[index].dc) {
-                colors.push(red);
-              } else {
-                colors.push(blue);
-              }
-            }
-          } else if (this.rpgSystem === "coc") {
-            if (normal) {
-              if (key <= this.tests[index].dc / 5) {
-                colors.push(green);
-              } else if (key <= this.tests[index].dc / 2) {
-                colors.push(blue);
-              } else if (key <= this.tests[index].dc) {
-                colors.push(yellow);
-              } else {
-                colors.push(red);
-              }
-            } else {
-              if (key >= this.tests[index].dc) {
-                colors.push(red);
-              } else {
-                colors.push(blue);
-              }
-            }
-          } else {
-            if (key > this.tests[index].dc || (key >= 17 && normal)) {
-              colors.push(red);
-            } else if (
-              (key <= this.tests[index].dc - 10 || key <= 4) &&
-              normal
-            ) {
-              colors.push(green);
-            } else {
-              colors.push(blue);
-            }
-          }
-        }
-      } else {
-        return [blue];
-      }
-    } else {
-      for (let key = 0; key <= this.tests[index].damage.max(); key++) {
-        if (key === 0) {
-          colors.push(red);
-        } else {
-          colors.push(blue);
-        }
-      }
-    }
-
-    return colors;
-  }
-
-  private text() {
-    let result: string[] = [];
-    this.submitData.forEach((line) => {
-      let text = "";
-      if (line.dices === "") {
-        const rpgDefault = Controller.rpgDefault("0", "0", this.rpgSystem);
-        text += rpgDefault[0] + "d" + rpgDefault[1];
-      } else {
-        text += line.dices;
-      }
-
-      if (this.rpgSystem !== "gurps" && line.bonus !== "") {
-        text += " + " + line.bonus;
-      }
-
-      if (line.dc !== "0") {
-        if (this.rpgSystem === "gurps") {
-          text += " NH" + line.dc;
-          if (line.bonus !== "") {
-            text += " + " + line.bonus;
-          }
-        } else {
-          text += " DC" + line.dc;
-        }
-      }
-
-      if (line.damage !== "") {
-        text += " Dam:" + line.damage;
-      }
-
-      if (line.crit !== "") {
-        text += " + " + line.crit;
-      }
-      result.push(text);
-    });
-    return result;
   }
 
   private formatData() {
@@ -233,22 +37,77 @@ export default class Graph {
 
     let datasets = this.datasets();
 
-    this.chartData = {
+    this.graphData = {
+      //Ordering labels
       labels: Array.from(labels).sort(function (a, b) {
         return a - b;
       }),
       datasets: datasets,
     };
 
-    const text = this.text();
+    const text = this.graphText();
 
-    this.configChart(text, this.chartData, false);
+    this.configGraph(text, this.graphData, false);
   }
 
-  private configChart(text: String[], chartData: any, reverse: boolean): void {
+  private labels(): Set<number> {
+    let labels = new Set<number>();
+    this.tests.forEach((test): void => {
+      labels = new Set<number>([...labels, ...test.labels()]);
+    });
+
+    return labels;
+  }
+
+  private datasets() {
+    let datasets: any[] = [];
+
+    this.tests.forEach((test, index) => {
+      datasets = datasets.concat(test.datasets(index));
+    });
+
+    return datasets;
+  }
+
+  private graphText(): string[] {
+    let result: string[] = [];
+    this.formsData.forEach((line) => {
+      let text = "";
+      if (line.dices === "") {
+        const rpgDefault = Controller.rpgDefault("0", "0", this.rpgSystem);
+        text += rpgDefault[0] + "d" + rpgDefault[1];
+      } else {
+        text += line.dices;
+      }
+
+      if (line.bonus !== "" && this.rpgSystem !== "gurps") {
+        text += " + " + line.bonus;
+      }
+
+      if (line.dc !== "0") {
+        if (this.rpgSystem === "gurps") {
+          text += " NH" + line.dc;
+        } else {
+          text += " DC" + line.dc;
+        }
+      }
+
+      if (line.damage !== "") {
+        text += " Dam:" + line.damage;
+      }
+
+      if (line.crit !== "") {
+        text += " + " + line.crit;
+      }
+      result.push(text);
+    });
+    return result;
+  }
+
+  private configGraph(text: String[], graphData: any, reverse: boolean): void {
     this.config = {
       type: "bar",
-      data: chartData,
+      data: graphData,
       options: {
         plugins: {
           title: {

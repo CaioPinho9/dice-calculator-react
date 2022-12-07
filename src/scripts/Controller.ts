@@ -43,7 +43,7 @@ export default class Controller {
         (!dices.match(/([0-9d><r~])+/) && dices !== "") ||
         (!damage.match(/([0-9d><r~])+/) && damage !== "")
       ) {
-        return;
+        throw new Error("Invalid caracters");
       }
 
       let testIndex = this.tests.length;
@@ -62,7 +62,9 @@ export default class Controller {
       }
       const dc = Number(line.dc);
       this.tests[testIndex].dc = dc;
-      this.tests[testIndex].extended = line.extended && damage !== "";
+      this.tests[testIndex].rpgSystem = rpgSystem;
+      this.tests[testIndex].formsData = line;
+      this.tests[testIndex].setExtended(line.extended && damage !== "");
 
       //Main dice probability
       let expressionChance: Chances;
@@ -78,39 +80,37 @@ export default class Controller {
         );
       }
 
-      if (line.damage === "") {
-        //Normal test
+      //Normal test
+      if (!this.tests[testIndex].hasDamage()) {
         this.tests[testIndex].normal = expressionChance;
+        return;
+      }
+
+      //Damage test
+      //Success probability
+      const success = this.successProbability(dc, expressionChance, rpgSystem);
+      //Damage chance
+      let damageChance = this.expressionChance(damage);
+
+      //Chance of zero damage
+      damageChance.set(0, (damageChance.sum() * (1 - success)) / success);
+
+      //Merge the damage with resultDamage
+      if (this.tests[testIndex].damage.size() === 0) {
+        this.tests[testIndex].damage = damageChance;
       } else {
-        //Damage test
-        //Success probability
-        const success = this.successProbability(
-          dc,
-          expressionChance,
-          rpgSystem
+        this.tests[testIndex].damage = Dice.mergeChances(
+          this.tests[testIndex].damage,
+          damageChance,
+          true
         );
-        //Damage chance
-        let damageChance = this.expressionChance(damage);
+      }
 
-        //Chance of zero damage
-        damageChance.set(0, (damageChance.sum() * (1 - success)) / success);
-
-        //Merge the damage with resultDamage
-        if (this.tests[testIndex].damage.size() === 0) {
-          this.tests[testIndex].damage = damageChance;
-        } else {
-          this.tests[testIndex].damage = Dice.mergeChances(
-            this.tests[testIndex].damage,
-            damageChance
-          );
-        }
-
-        if (critical !== "") {
-          criticalData.push({
-            critical: this.expressionChance(critical),
-            probability: this.criticalProbability(expressionChance, dc),
-          });
-        }
+      if (critical !== "") {
+        criticalData.push({
+          critical: this.expressionChance(critical),
+          probability: this.criticalProbability(expressionChance, dc),
+        });
       }
     });
 
