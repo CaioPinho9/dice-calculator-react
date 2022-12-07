@@ -5,26 +5,27 @@ import Graph from "./Graph.ts";
 import Dice from "./Dice.ts";
 // @ts-ignore
 import Chances from "./types/Chances.ts";
+// @ts-ignore
+import Test from "./Test.ts";
 
 export default class Controller {
   //Graph object
   public chart: Chart;
   public rpgSystem: string;
-  public resultTests: Chances[] = [];
-  public resultDamage: Chances = new Chances();
-  public dc: string[] = [];
+  public tests: Test[] = [];
 
   public interpreter(formsData: any[], rpgSystem: string) {
     this.rpgSystem = rpgSystem;
     //Refresh
-    this.resultTests = [];
-    this.resultDamage = new Chances();
+    this.tests = [];
+
+    let criticalData: { critical: Chances; probability: number }[] = [];
 
     //Process each line from forms
     formsData.forEach((line) => {
       let dices: string;
       let damage: string;
-
+      let critical: string;
       //Format
       dices = line.dices.toLowerCase();
       dices = dices.replace(" ", "");
@@ -33,7 +34,11 @@ export default class Controller {
       damage = line.damage.toLowerCase();
       damage = damage.replace(" ", "");
       damage = damage.replace("-", "+-");
+      critical = line.crit.toLowerCase();
+      critical = critical.replace(" ", "");
+      critical = critical.replace("-", "+-");
 
+      //Error when using wrong caracters
       if (
         (!dices.match(/([0-9d><r~])+/) && dices !== "") ||
         (!damage.match(/([0-9d><r~])+/) && damage !== "")
@@ -41,75 +46,110 @@ export default class Controller {
         return;
       }
 
-      if (!line.extended) {
-        if (rpgSystem === "gurps") {
-          this.dc.push(String(Number(line.dc) + Number(line.bonus)));
-        } else {
-          this.dc.push(String(Number(line.dc)));
-        }
+      let testIndex = this.tests.length;
+      if (Test.getDamageIndex(this.tests) === -1) {
+        this.tests.push(new Test());
+      } else {
+        testIndex = Test.getDamageIndex(this.tests);
       }
 
-      let expressionChance = this.expressionChance(dices);
+      //DC used to change graph colors
+      if (line.dc === "") {
+        line.dc = "0";
+      }
+      if (rpgSystem === "gurps") {
+        line.dc = String(Number(line.dc) + Number(line.bonus));
+      }
+      const dc = Number(line.dc);
+      this.tests[testIndex].dc = dc;
+      this.tests[testIndex].extended = line.extended && damage !== "";
 
-      if (rpgSystem !== "gurps") {
+      //Main dice probability
+      let expressionChance: Chances;
+      try {
+        expressionChance = this.expressionChance(dices);
+      } catch (error) {}
+
+      //Add bonus
+      if (rpgSystem !== "gurps" && line.bonus !== "") {
         expressionChance = Dice.deslocateProbability(
           expressionChance,
           Number(line.bonus)
         );
       }
 
-      if (dices.includes("d")) {
-        if (line.damage === "") {
-          //Normal test
-          this.resultTests.push(expressionChance);
-        } else {
-          //Damage test
-          //Gurps dc/nh uses bonus
-          const dc =
-            rpgSystem === "gurps"
-              ? Number(line.dc) + Number(line.bonus)
-              : Number(line.dc);
-          //Success probability
-          const success = this.successProbability(
-            dc,
-            expressionChance,
-            rpgSystem
-          );
-          //Damage chance
-          const damageChance = this.expressionChance(damage);
-
-          //Chance of zero damage
-          damageChance.set(
-            0,
-            Math.round((damageChance.sum() * (1 - success)) / success)
-          );
-
-          //Merge the damage with resultDamage
-          if (this.resultDamage.size() === 0) {
-            this.resultDamage = damageChance;
-          } else {
-            this.resultDamage = Dice.mergeChances(
-              this.resultDamage,
-              damageChance
-            );
-          }
-        }
+      if (line.damage === "") {
+        //Normal test
+        this.tests[testIndex].normal = expressionChance;
       } else {
-        //Number only
-        let dict = new Chances();
-        dict.set(Number(dices), 1);
-        this.resultTests.push(dict);
+        //Damage test
+        //Success probability
+        const success = this.successProbability(
+          dc,
+          expressionChance,
+          rpgSystem
+        );
+        //Damage chance
+        let damageChance = this.expressionChance(damage);
+
+        //Chance of zero damage
+        damageChance.set(0, (damageChance.sum() * (1 - success)) / success);
+
+        //Merge the damage with resultDamage
+        if (this.tests[testIndex].damage.size() === 0) {
+          this.tests[testIndex].damage = damageChance;
+        } else {
+          this.tests[testIndex].damage = Dice.mergeChances(
+            this.tests[testIndex].damage,
+            damageChance
+          );
+        }
+
+        if (critical !== "") {
+          criticalData.push({
+            critical: this.expressionChance(critical),
+            probability: this.criticalProbability(expressionChance, dc),
+          });
+        }
       }
     });
+
+    criticalData.forEach((data) => {
+      let damage: Chances = new Chances();
+      let index = Test.getDamageIndex(this.tests);
+
+      this.tests[index].damage.getKeys().forEach((key: number) => {
+        if (key > 0) {
+          damage.set(key, this.tests[index].damage.get(key));
+        }
+      });
+
+      data.critical = Dice.mergeChances(damage, data.critical, true);
+
+      data.critical.multiply(
+        (this.tests[index].damage.sum() * data.probability) /
+          (1 - data.probability) /
+          data.critical.sum()
+      );
+
+      if (this.tests[index].critical.size() === 0) {
+        this.tests[index].critical = data.critical;
+      } else {
+        this.tests[index].critical = Dice.mergeChances(
+          this.tests[index].critical,
+          data.critical,
+          true
+        );
+      }
+    });
+
     this.buildChart(formsData, rpgSystem);
   }
 
   /**
    *
-   * @param expression ""
-   * @returns Chances
    */
-  private expressionChance(expression: string) {
+  private expressionChance(expression: string): Chances {
     const dicesPlusSeparation: string[] = expression.split("+");
     let chances: Chances[] = [];
     let resultChances: Chances = new Chances();
@@ -172,40 +212,16 @@ export default class Controller {
       );
     }
 
-    //Sum the bonus
-    resultChances = Dice.deslocateProbability(resultChances, bonus);
+    if (expression.includes("d")) {
+      //Sum the bonus
+      resultChances = Dice.deslocateProbability(resultChances, bonus);
+    } else {
+      let bonusChance = new Chances();
+      bonusChance.set(bonus, 1);
+      resultChances = bonusChance;
+    }
 
     return resultChances;
-  }
-
-  /**
-   * @param dc The number used to say where is the success
-   * @param chances Chances of each key
-   * @param rpgSystem In gurps and coc, the lower is better, while in dnd the higher is better
-   * @returns Success probability
-   */
-  private successProbability(
-    dc: number,
-    chances: Chances,
-    rpgSystem: string
-  ): number {
-    let successChances: number = 0;
-
-    //Check if key is a success, depending on the system
-    chances.getKeys().forEach((key: number) => {
-      if (rpgSystem === "gurps" || rpgSystem === "coc") {
-        if (dc >= key) {
-          successChances += chances.get(key);
-        }
-      } else {
-        if (dc <= key) {
-          successChances += chances.get(key);
-        }
-      }
-    });
-
-    //Success probability
-    return successChances / chances.sum();
   }
 
   /**
@@ -294,7 +310,11 @@ export default class Controller {
   /**
    * If nDice or sides is empty, return default value of the system
    */
-  private static rpgDefault(nDice: string, sides: string, rpgSystem: string): string[] {
+  private static rpgDefault(
+    nDice: string,
+    sides: string,
+    rpgSystem: string
+  ): string[] {
     if (nDice === "0" || nDice === "") {
       if (rpgSystem === "gurps") {
         nDice = "3";
@@ -319,17 +339,64 @@ export default class Controller {
   }
 
   /**
+   * @param dc The number used to say where is the success
+   * @param chances Chances of each key
+   * @param rpgSystem In gurps and coc, the lower is better, while in dnd the higher is better
+   * @returns Success probability
+   */
+  private successProbability(
+    dc: number,
+    chances: Chances,
+    rpgSystem: string
+  ): number {
+    let successChances: number = 0;
+
+    //Check if key is a success, depending on the system
+    chances.getKeys().forEach((key: number) => {
+      if (rpgSystem === "gurps" || rpgSystem === "coc") {
+        if (dc >= key) {
+          successChances += chances.get(key);
+        }
+      } else {
+        if (dc <= key) {
+          successChances += chances.get(key);
+        }
+      }
+    });
+
+    //Success probability
+    return successChances / chances.sum();
+  }
+
+  private criticalProbability(expression: Chances, dc: number): number {
+    let crit: number = 0;
+    if (this.rpgSystem === "dnd") {
+      crit = expression.get(20);
+    } else if (this.rpgSystem === "coc") {
+      expression.getKeys().forEach((key: number) => {
+        if (key <= dc / 5) {
+          crit += expression.get(key);
+        }
+      });
+    } else {
+      expression.getKeys().forEach((key: number) => {
+        if (key <= dc - 10 || key <= 4) {
+          crit += expression.get(key);
+        }
+      });
+    }
+    crit *= 1 / expression.sum();
+    console.log(crit);
+
+    return crit;
+  }
+
+  /**
    * Config and create chart
    */
   private buildChart(formsData: any[], rpgSystem: string) {
     //Config chart
-    const graph = new Graph(
-      formsData,
-      rpgSystem,
-      this.resultTests,
-      this.resultDamage,
-      this.dc
-    );
+    const graph = new Graph(formsData, rpgSystem, this.tests);
 
     //Destroy old chart
     if (this.chart) {

@@ -99,4 +99,10 @@ export default class Dictionary implements IKeyCollection {
     }
     return array;
   }
+
+  multiply(value: number) {
+    this.getKeys().forEach((key) => {
+      this.items[key] = this.items[key] * value;
+    });
+  }
 }

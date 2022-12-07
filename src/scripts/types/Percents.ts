@@ -11,7 +11,7 @@ export default class Percents extends Dictionary {
     var chances = new Chances();
     super.getKeys().forEach((key: number) => {
       const value = super.get(key);
-      chances.set(key, parseFloat(((value * totalChances) / 100).toFixed(2)));
+      chances.set(key, Math.round(value * totalChances) / 100);
     });
     return chances;
   }
@@ -21,7 +21,7 @@ export default class Percents extends Dictionary {
     var decimals = new Decimals();
     super.getKeys().forEach((key: number) => {
       const value = super.get(key);
-      decimals.set(key, parseFloat((value / 100).toFixed(2)));
+      decimals.set(key, Math.round(value) / 100);
     });
     return decimals;
   }

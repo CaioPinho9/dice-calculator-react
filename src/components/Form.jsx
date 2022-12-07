@@ -61,21 +61,25 @@ class Form extends Component {
             ></input>
           </label>
         )}
-        <label htmlFor="">
-          <br />
-          <p style={{ paddingBottom: "8px" }}>+</p>
-        </label>
-        <label>
-          <p>Bonus</p>
-          <input
-            type="text"
-            placeholder="Bonus"
-            style={{ width: "50px" }}
-            onChange={(e) => {
-              this.setState({ bonus: e.target.value });
-            }}
-          ></input>
-        </label>
+        {this.props.rpgSystem !== "coc" && (
+          <React.Fragment>
+            <label htmlFor="">
+              <br />
+              <p style={{ paddingBottom: "8px" }}>+</p>
+            </label>
+            <label>
+              <p>Bonus</p>
+              <input
+                type="text"
+                placeholder="Bonus"
+                style={{ width: "50px" }}
+                onChange={(e) => {
+                  this.setState({ bonus: e.target.value });
+                }}
+              ></input>
+            </label>
+          </React.Fragment>
+        )}
         {this.props.rpgSystem !== "gurps" && (
           <label>
             <p>DC</p>

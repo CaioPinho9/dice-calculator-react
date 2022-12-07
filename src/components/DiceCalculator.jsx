@@ -11,6 +11,7 @@ class DiceCalculator extends Component {
       formQnt: 1,
       formData: [],
       forms: [],
+      legend: [],
       controller: new Controller(),
     };
   }
@@ -84,6 +85,9 @@ class DiceCalculator extends Component {
 
   decreaseForms = () => {
     if (this.state.formQnt > 1) {
+      let form = this.state.formData;
+      form.pop();
+      this.setState({ formData: form });
       this.setState({ formQnt: this.state.formQnt - 1 });
     }
   };
@@ -114,6 +118,8 @@ class DiceCalculator extends Component {
         this.props.rpgSystem
       )
     );
+
+    document.getElementById("canvas").style.display = "block";
   };
 }
 

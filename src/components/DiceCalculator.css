@@ -65,4 +65,5 @@ input {
 .Calculator-chart {
   border: 2px solid #666;
   border-radius: 10px;
+  display: none;
 }

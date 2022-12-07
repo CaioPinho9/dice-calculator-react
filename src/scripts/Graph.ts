@@ -1,122 +1,177 @@
 // @ts-ignore
+import Color from "./Color.ts";
+// @ts-ignore
 import Controller from "./Controller.ts";
 // @ts-ignore
-import Chances from "./types/Chances.ts";
-// @ts-ignore
-import Utils from "./Utils.ts";
+import Test from "./Test.ts";
 
 export default class Graph {
   private chartData: { labels: Number[]; datasets: any[] };
   private submitData: any[];
   private rpgSystem: string;
-  private normalProbability: Chances[] = [];
-  private damageProbability: Chances = new Chances();
-  private dc: string[];
+  private tests: Test[];
   private config: any;
 
-  constructor(
-    submitData: any[],
-    rpgSystem: string,
-    normalProbability: Chances[],
-    damageProbability: Chances,
-    dc: string[]
-  ) {
+  constructor(submitData: any[], rpgSystem: string, tests: Test[]) {
     this.submitData = submitData;
     this.rpgSystem = rpgSystem;
-    this.normalProbability = normalProbability;
-    this.damageProbability = damageProbability;
-    this.dc = dc;
+    this.tests = tests;
     this.formatData();
   }
 
   private labels(): Set<number> {
     let labels = new Set<number>();
-    this.normalProbability.forEach((element): void => {
-      for (let i = element.min(); i <= element.max(); i++) {
+    this.tests.forEach((test): void => {
+      for (let i = test.normal.min(); i <= test.normal.max(); i++) {
         labels.add(i);
+      }
+      if (test.damage.sum() !== 0) {
+        for (let i: number = test.damage.min(); i <= test.damage.max(); i++) {
+          labels.add(i);
+        }
+      }
+      if (test.critical.sum() !== 0) {
+        for (
+          let i: number = test.critical.min();
+          i <= test.critical.max();
+          i++
+        ) {
+          labels.add(i);
+        }
       }
     });
 
-    for (
-      let i: number = this.damageProbability.min();
-      i <= this.damageProbability.max();
-      i++
-    ) {
-      labels.add(i);
-    }
     return labels;
   }
 
   private datasets() {
-    let datasets = [{}];
+    let datasets: any[] = [];
     let index = 0;
 
-    for (; index < this.normalProbability.length; index++) {
-      datasets.push({
-        label: "Test " + (index + 1),
-        backgroundColor: this.backgroundColors(index),
-        borderColor: this.backgroundColors(index),
-        borderRadius: 5,
-        minBarThickness: 30,
-        maxBarThickness: 100,
-        data: this.normalProbability[index].toPercent().toArray(),
-        stack: "Stack " + index,
-      });
+    for (; index < this.tests.length; index++) {
+      if (!this.tests[index].extended) {
+        datasets.push({
+          label: "Test " + (index + 1),
+          backgroundColor: this.backgroundColors(index),
+          borderColor: this.backgroundColors(index),
+          borderRadius: 5,
+          minBarThickness: 30,
+          maxBarThickness: 100,
+          data: this.tests[index].normal.toPercent().toArray(),
+          stack: "Stack " + index,
+        });
+      } else {
+        datasets.push({
+          label: "Damage",
+          backgroundColor: this.backgroundColors(index),
+          borderColor: this.backgroundColors(index),
+          borderRadius: 5,
+          minBarThickness: 30,
+          maxBarThickness: 100,
+          data: this.tests[index].damage.toPercent().toArray(),
+          stack: "Stack " + index,
+        });
+
+        if (this.tests[index].critical.sum() !== 0) {
+          datasets.push({
+            label: "Critical",
+            backgroundColor: index === 0 ? Color.green : Color.randomGreen(),
+            borderColor: index === 0 ? Color.green : Color.randomGreen(),
+            borderRadius: 5,
+            minBarThickness: 30,
+            maxBarThickness: 100,
+            data: this.tests[index].critical
+              .toPercent(this.tests[index].damage)
+              .toArray(),
+            stack: "Stack " + index,
+          });
+        }
+      }
     }
 
-    datasets.push({
-      label: "Damage",
-      backgroundColor: this.damageColors(index),
-      borderColor: this.damageColors(index),
-      borderRadius: 5,
-      minBarThickness: 30,
-      maxBarThickness: 100,
-      data: this.damageProbability.toPercent().toArray(),
-      stack: "Stack " + index,
-    });
     return datasets;
   }
 
   private backgroundColors(index: number) {
     let colors: string[] = [];
-    let color: string = Utils.randomColor(index === 0);
-    if (this.dc[index] !== "" && this.dc[index] !== "0") {
-      for (
-        let key = this.normalProbability[index].min();
-        key <= this.normalProbability[index].max();
-        key++
-      ) {
-        if (this.rpgSystem === "dnd") {
-          if (key < Number(this.dc[index])) {
-            colors.push("rgb(255,0,0)");
+    const green: string = index === 0 ? Color.green : Color.randomGreen();
+    const blue: string = index === 0 ? Color.blue : Color.randomBlue();
+    const yellow: string = index === 0 ? Color.yellow : Color.randomYellow();
+    const red: string = index === 0 ? Color.red : Color.randomRed();
+    let normal: boolean =
+      this.submitData[index].dices === "" ||
+      (this.submitData[index].dices === "3d6" && this.rpgSystem === "gurps") ||
+      (this.submitData[index].dices === "1d100" && this.rpgSystem === "coc") ||
+      (this.submitData[index].dices.includes("d20") &&
+        this.rpgSystem === "dnd");
+
+    if (!this.tests[index].extended) {
+      if (this.tests[index].dc !== 0) {
+        for (
+          let key = this.tests[index].normal.min();
+          key <= this.tests[index].normal.max();
+          key++
+        ) {
+          if (this.rpgSystem === "dnd") {
+            if (normal) {
+              if (key < this.tests[index].dc) {
+                colors.push(red);
+              } else if (key < 20) {
+                colors.push(blue);
+              } else {
+                colors.push(green);
+              }
+            } else {
+              if (key < this.tests[index].dc) {
+                colors.push(red);
+              } else {
+                colors.push(blue);
+              }
+            }
+          } else if (this.rpgSystem === "coc") {
+            if (normal) {
+              if (key <= this.tests[index].dc / 5) {
+                colors.push(green);
+              } else if (key <= this.tests[index].dc / 2) {
+                colors.push(blue);
+              } else if (key <= this.tests[index].dc) {
+                colors.push(yellow);
+              } else {
+                colors.push(red);
+              }
+            } else {
+              if (key >= this.tests[index].dc) {
+                colors.push(red);
+              } else {
+                colors.push(blue);
+              }
+            }
           } else {
-            colors.push(color);
-          }
-        } else {
-          if (key > Number(this.dc[index])) {
-            colors.push("rgb(255,0,0)");
-          } else {
-            colors.push(color);
+            if (key > this.tests[index].dc || (key >= 17 && normal)) {
+              colors.push(red);
+            } else if (
+              (key <= this.tests[index].dc - 10 || key <= 4) &&
+              normal
+            ) {
+              colors.push(green);
+            } else {
+              colors.push(blue);
+            }
           }
         }
+      } else {
+        return [blue];
       }
     } else {
-      return [color];
-    }
-    return colors;
-  }
-
-  private damageColors(index: number) {
-    let colors: string[] = [];
-    let color: string = Utils.randomColor(index === 0);
-
-    for (let key = 0; key <= this.damageProbability.max(); key++) {
-      if (key === 0) {
-        colors.push("rgb(255,0,0)");
-      } else {
-        colors.push(color);
+      for (let key = 0; key <= this.tests[index].damage.max(); key++) {
+        if (key === 0) {
+          colors.push(red);
+        } else {
+          colors.push(blue);
+        }
       }
     }
+
     return colors;
   }
 
@@ -125,12 +180,7 @@ export default class Graph {
     this.submitData.forEach((line) => {
       let text = "";
       if (line.dices === "") {
-        const split = line.dices.split("d");
-        const rpgDefault = Controller.rpgDefault(
-          split[0],
-          split[1],
-          this.rpgSystem
-        );
+        const rpgDefault = Controller.rpgDefault("0", "0", this.rpgSystem);
         text += rpgDefault[0] + "d" + rpgDefault[1];
       } else {
         text += line.dices;
@@ -140,9 +190,12 @@ export default class Graph {
         text += " + " + line.bonus;
       }
 
-      if (line.dc !== "") {
+      if (line.dc !== "0") {
         if (this.rpgSystem === "gurps") {
-          text += " NH" + line.dc + " + " + line.bonus;
+          text += " NH" + line.dc;
+          if (line.bonus !== "") {
+            text += " + " + line.bonus;
+          }
         } else {
           text += " DC" + line.dc;
         }
@@ -165,14 +218,17 @@ export default class Graph {
 
     //Same length data
     Array.from(labels).forEach((label) => {
-      this.normalProbability.forEach((element) => {
-        if (element.get(label) === undefined) {
-          element.set(label, 0);
+      this.tests.forEach((test) => {
+        if (test.normal.get(label) === undefined) {
+          test.normal.set(label, 0);
+        }
+        if (test.damage.get(label) === undefined) {
+          test.damage.set(label, 0);
+        }
+        if (test.critical.get(label) === undefined) {
+          test.critical.set(label, 0);
         }
       });
-      if (this.damageProbability.get(label) === undefined) {
-        this.damageProbability.set(label, 0);
-      }
     });
 
     let datasets = this.datasets();
@@ -198,7 +254,7 @@ export default class Graph {
           title: {
             display: true,
             text: text,
-            color: "black",
+            blue: "black",
             position: "bottom",
             padding: 0,
             font: {
@@ -209,7 +265,7 @@ export default class Graph {
           legend: {
             display: false,
             labels: {
-              color: "black",
+              blue: "black",
             },
             fillStyle: "rgb(20, 152, 222)",
             strokeStyle: "rgb(20, 152, 222)",
@@ -222,13 +278,13 @@ export default class Graph {
           x: {
             reverse: reverse,
             ticks: {
-              color: "black",
+              blue: "black",
             },
             stacked: true,
           },
           y: {
             ticks: {
-              color: "black",
+              blue: "black",
             },
             stacked: true,
           },
@@ -236,7 +292,7 @@ export default class Graph {
             type: "linear",
             position: "right",
             ticks: {
-              color: "black",
+              blue: "black",
             },
           },
         },
