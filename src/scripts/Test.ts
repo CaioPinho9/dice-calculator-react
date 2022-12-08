@@ -2,6 +2,8 @@
 import Chances from "./types/Chances.ts";
 // @ts-ignore
 import Color from "./Color.ts";
+// @ts-ignore
+import Utils from "./Utils.ts";
 
 export default class Test {
   private extended: boolean;
@@ -9,6 +11,7 @@ export default class Test {
   public normal: Chances;
   public damage: Chances;
   public critical: Chances;
+  public xCrit: boolean;
   public rpgSystem: string;
   public formsData: any;
   public colors: {
@@ -23,6 +26,7 @@ export default class Test {
     this.damage = new Chances();
     this.critical = new Chances();
     this.colors = { red: "", yellow: "", green: "", blue: "" };
+    this.xCrit = false;
   }
 
   public static getDamageIndex(tests: Test[]) {
@@ -69,7 +73,7 @@ export default class Test {
         label: "Test " + (index + 1),
         backgroundColor: this.getBarColors(index),
         borderColor: this.getBarColors(index),
-        borderRadius: 5,
+        borderRadius: 20,
         minBarThickness: 30,
         maxBarThickness: 100,
         data: this.normal.toPercent().toArray(),
@@ -80,7 +84,7 @@ export default class Test {
         label: "Damage",
         backgroundColor: this.getBarColors(index),
         borderColor: this.getBarColors(index),
-        borderRadius: 5,
+        borderRadius: 20,
         minBarThickness: 30,
         maxBarThickness: 100,
         data: this.damage.toPercent(this.critical).toArray(),
@@ -95,7 +99,7 @@ export default class Test {
         label: "Critical",
         backgroundColor: this.colors.green,
         borderColor: this.colors.green,
-        borderRadius: 5,
+        borderRadius: 20,
         minBarThickness: 30,
         maxBarThickness: 100,
         data: this.critical.toPercent(this.damage).toArray(),
@@ -146,7 +150,7 @@ export default class Test {
     if (this.rpgDefault()) {
       if (key < this.dc) {
         return this.colors.red;
-      } else if (key < 20) {
+      } else if (key < (!this.xCrit ? 20 : 19)) {
         return this.colors.blue;
       } else {
         return this.colors.green;
@@ -241,6 +245,9 @@ export default class Test {
     let crit: number = 0;
     if (this.rpgSystem === "dnd") {
       crit = this.normal.get(20);
+      if (this.xCrit) {
+        crit += this.normal.get(19);
+      }
     } else if (this.rpgSystem === "coc") {
       this.normal.getKeys().forEach((key: number) => {
         if (key <= this.dc / 5) {
@@ -272,21 +279,24 @@ export default class Test {
     let percentage: string[] = [];
     const success = this.successProbability();
     const critical = this.criticalProbability();
+    const average = this.average();
+    percentage.push(average);
 
     if (this.dc === 0) {
-      return ["100%"];
+      percentage.push("100%");
+      return percentage;
     }
 
     if (this.rpgSystem !== "coc" && this.rpgDefault()) {
-      percentage.push(String(Math.round((1 - success) * 10000) / 100) + "%");
-      percentage.push(String(Math.round(success * 10000) / 100) + "%");
-      percentage.push(String(Math.round(critical * 10000) / 100) + "%");
+      percentage.push(String(Utils.twoDecimals((1 - success) * 100)) + "%");
+      percentage.push(String(Utils.twoDecimals(success * 100)) + "%");
+      percentage.push(String(Utils.twoDecimals(critical * 100)) + "%");
       return percentage;
     }
 
     if (!this.rpgDefault()) {
-      percentage.push(String(Math.round((1 - success) * 10000) / 100) + "%");
-      percentage.push(String(Math.round(success * 10000) / 100) + "%");
+      percentage.push(String(Utils.twoDecimals((1 - success) * 100)) + "%");
+      percentage.push(String(Utils.twoDecimals(success * 100)) + "%");
       return percentage;
     }
 
@@ -311,17 +321,45 @@ export default class Test {
     });
 
     percentage.push(
-      String(Math.round((red / this.normal.sum()) * 10000) / 100) + "%"
+      String(Utils.twoDecimals((red / this.normal.sum()) * 100)) + "%"
     );
     percentage.push(
-      String(Math.round((yellow / this.normal.sum()) * 10000) / 100) + "%"
+      String(Utils.twoDecimals((yellow / this.normal.sum()) * 100)) + "%"
     );
     percentage.push(
-      String(Math.round((blue / this.normal.sum()) * 10000) / 100) + "%"
+      String(Utils.twoDecimals((blue / this.normal.sum()) * 100)) + "%"
     );
     percentage.push(
-      String(Math.round((green / this.normal.sum()) * 10000) / 100) + "%"
+      String(Utils.twoDecimals((green / this.normal.sum()) * 100)) + "%"
     );
     return percentage;
+  }
+
+  average(): string {
+    let average = 0;
+    let total = 0;
+    if (!this.hasDamage()) {
+      this.normal.getKeys().forEach((key: number) => {
+        average += key * this.normal.get(key);
+      });
+      average *= 1 / this.normal.sum();
+      return String(Utils.twoDecimals(average));
+    }
+
+    this.damage.getKeys().forEach((key: number) => {
+      average += key * this.damage.get(key);
+    });
+
+    total = this.damage.sum();
+
+    if (this.hasCritical()) {
+      this.critical.getKeys().forEach((key: number) => {
+        average += key * this.critical.get(key);
+      });
+      total += this.critical.sum();
+    }
+
+    average *= 1 / total;
+    return String(Utils.twoDecimals(average));
   }
 }

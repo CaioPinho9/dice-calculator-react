@@ -8,4 +8,8 @@ export default class Utils {
     for (var i = 2; i <= num; i++) result = result * i;
     return result;
   }
+
+  public static twoDecimals(num: number) {
+    return Math.round(num * 100) / 100;
+  }
 }

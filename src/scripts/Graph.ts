@@ -9,11 +9,13 @@ export default class Graph {
   private rpgSystem: string;
   private tests: Test[];
   private config: any;
+  private rpgDefault: boolean;
 
   constructor(formsData: any[], rpgSystem: string, tests: Test[]) {
     this.formsData = formsData;
     this.rpgSystem = rpgSystem;
     this.tests = tests;
+    this.rpgDefault = false;
     this.formatData();
   }
 
@@ -32,6 +34,7 @@ export default class Graph {
         if (test.critical.get(label) === undefined) {
           test.critical.set(label, 0);
         }
+        this.rpgDefault = this.rpgDefault || test.rpgDefault();
       });
     });
 
@@ -47,7 +50,7 @@ export default class Graph {
 
     const text = this.graphText();
 
-    this.configGraph(text, this.graphData, false);
+    this.configGraph(text, this.graphData);
   }
 
   private labels(): Set<number> {
@@ -104,7 +107,7 @@ export default class Graph {
     return result;
   }
 
-  private configGraph(text: String[], graphData: any, reverse: boolean): void {
+  private configGraph(text: String[], graphData: any): void {
     this.config = {
       type: "bar",
       data: graphData,
@@ -135,7 +138,7 @@ export default class Graph {
         },
         scales: {
           x: {
-            reverse: this.rpgSystem !== "dnd",
+            reverse: this.rpgSystem !== "dnd" && this.rpgDefault,
             ticks: {
               blue: "black",
             },

@@ -41,9 +41,16 @@ export default class Dice {
       var chancesRerolled = new Chances();
       for (var key = 1; key <= sideDice; key++) {
         var chancesReroll = new Chances();
-        chancesReroll.set(key, 1);
         if (key <= reroll) {
-          chancesReroll = Dice.chances(1, sideDice);
+          if (chancesReroll.size() === 0) {
+            chancesReroll = Dice.chances(1, sideDice);
+          } else {
+            chancesReroll = Dice.sumChances(
+              Dice.chances(1, sideDice),
+              chancesReroll,
+              true
+            );
+          }
           if (rerollAlways) {
             // eslint-disable-next-line
             chancesReroll.getKeys().forEach((key: number) => {
@@ -52,6 +59,8 @@ export default class Dice {
               }
             });
           }
+        } else {
+          chancesReroll.add(key, 1);
         }
         if (chancesRerolled.size() === 0) {
           chancesRerolled = chancesReroll;

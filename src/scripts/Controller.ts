@@ -68,6 +68,11 @@ export default class Controller {
       this.tests[testIndex].formsData = line;
       this.tests[testIndex].setExtended(line.extended && damage !== "");
 
+      if (critical.includes("x")) {
+        critical = critical.replace("x", "");
+        this.tests[testIndex].xCrit = true;
+      }
+
       //Main dice probability
       let expressionChance: Chances;
       try {
@@ -146,6 +151,23 @@ export default class Controller {
         }
       });
 
+      //Normalize above 0
+      const minValue = this.tests[index].damage.minValue();
+      if (minValue < 0) {
+        this.tests[index].damage.getKeys().forEach((key: number) => {
+          this.tests[index].damage.set(
+            key,
+            this.tests[index].damage.get(key) - minValue + 1
+          );
+        });
+        this.tests[index].critical.getKeys().forEach((key: number) => {
+          this.tests[index].critical.set(
+            key,
+            this.tests[index].critical.get(key) - minValue + 1
+          );
+        });
+      }
+
       if (this.tests[index].critical.size() === 0) {
         this.tests[index].critical = data.chances;
       } else {
@@ -194,13 +216,6 @@ export default class Controller {
           sum.push(true);
         }
 
-        //Check if is a hitdice calculation
-        if (separation.includes("h")) {
-          separation = separation.replace("h", "");
-          reRoll = 1;
-          hitDices = true;
-        }
-
         //Check if is a reroll calculation
         if (separation.includes("r")) {
           const rerollArray: string[] = this.reRoll(separation);
@@ -208,6 +223,13 @@ export default class Controller {
           reRoll = Number(rerollArray[1]);
         } else {
           reRoll = 0;
+        }
+
+        //Check if is a hitdice calculation
+        if (separation.includes("h")) {
+          separation = separation.replace("h", "");
+          reRoll = 1;
+          hitDices = true;
         }
 
         if (

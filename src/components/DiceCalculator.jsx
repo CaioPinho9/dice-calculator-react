@@ -133,41 +133,43 @@ class DiceCalculator extends Component {
       legend.value.forEach((collumn, index) => {
         let colors = [];
         let text = [];
-        if (legend.value.length === 1) {
-          colors = [legend.colors.blue];
-          text = ["Normal"];
-        } else if (legend.value.length === 2) {
-          colors = [legend.colors.red, legend.colors.blue];
-          text = ["Fail", "Success"];
+        let gray = `#a3b6d8`;
+        if (legend.value.length === 2) {
+          colors = [gray, legend.colors.blue];
+          text = ["Average", "Normal"];
         } else if (legend.value.length === 3) {
-          colors = [legend.colors.red, legend.colors.blue, legend.colors.green];
-          text = ["Fail", "Success", "Critical"];
+          colors = [gray, legend.colors.red, legend.colors.blue];
+          text = ["Average", "Fail", "Success"];
+        } else if (legend.value.length === 4) {
+          colors = [
+            gray,
+            legend.colors.red,
+            legend.colors.blue,
+            legend.colors.green,
+          ];
+          text = ["Average", "Fail", "Success", "Critical"];
         } else {
           colors = [
+            gray,
             legend.colors.red,
             legend.colors.yellow,
             legend.colors.blue,
             legend.colors.green,
           ];
-          text = ["Fail", "Normal", "Hard", "Extreme"];
+          text = ["Average", "Fail", "Normal", "Hard", "Extreme"];
         }
         collumns.push(
           <div
+            title={text[index]}
             className="Chart-legends"
             style={{ backgroundColor: colors[index] }}
           >
-            <p title={text[index]} key={key}>
-              {collumn}
-            </p>
+            <p key={key}>{collumn}</p>
           </div>
         );
       });
       key++;
-      rows.push(
-        <div style={{ margin: "20px" }}>
-          {collumns}
-        </div>
-      );
+      rows.push(<div style={{ margin: "10px" }}>{collumns}</div>);
     });
     return <div className="Chart-container">{rows}</div>;
   };
