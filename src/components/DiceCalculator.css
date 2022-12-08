@@ -67,3 +67,22 @@ input {
   border-radius: 10px;
   display: none;
 }
+
+.Chart-container {
+  display: block;
+}
+
+.Chart-legends {
+  display: inline;
+  border: 2px solid #333;
+  padding: 5px;
+  border-radius: 10px;
+  margin: 5px;
+}
+
+.Chart-legends p {
+  display: inline;
+  padding: 5px;
+  border-radius: 4px;
+  margin: 5px;
+}

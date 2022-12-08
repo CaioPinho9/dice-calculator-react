@@ -13,7 +13,7 @@ export default class Controller {
   public chart: Chart;
   public rpgSystem: string;
   public tests: Test[] = [];
-  public legends: any[] = [];
+  public legends: { value: string[]; colors: string[] }[] = [];
 
   public interpreter(formsData: any[], rpgSystem: string) {
     this.rpgSystem = rpgSystem;
@@ -21,7 +21,7 @@ export default class Controller {
     this.tests = [];
     this.legends = [];
 
-    let criticalData: { critical: Chances; probability: number }[] = [];
+    let criticalData: { chances: Chances; probability: number }[] = [];
 
     //Process each line from forms
     formsData.forEach((line) => {
@@ -110,7 +110,7 @@ export default class Controller {
 
       if (critical !== "") {
         criticalData.push({
-          critical: this.expressionChance(critical),
+          chances: this.expressionChance(critical),
           probability: this.tests[testIndex].criticalProbability(),
         });
       }
@@ -126,12 +126,12 @@ export default class Controller {
         }
       });
 
-      data.critical = Dice.mergeChances(damage, data.critical, true);
+      data.chances = Dice.mergeChances(damage, data.chances, true);
 
-      data.critical.multiply(
+      data.chances.multiply(
         (this.tests[index].damage.sum() * data.probability) /
           (1 - data.probability) /
-          data.critical.sum()
+          data.chances.sum()
       );
 
       let removeCritical = data.probability * this.tests[index].damage.sum();
@@ -147,11 +147,11 @@ export default class Controller {
       });
 
       if (this.tests[index].critical.size() === 0) {
-        this.tests[index].critical = data.critical;
+        this.tests[index].critical = data.chances;
       } else {
         this.tests[index].critical = Dice.mergeChances(
           this.tests[index].critical,
-          data.critical,
+          data.chances,
           true
         );
       }
@@ -160,8 +160,7 @@ export default class Controller {
     this.buildChart(formsData, rpgSystem);
 
     this.tests.forEach((test) => {
-      this.legends.push(test.legend());
-      console.log(test.legend());
+      this.legends.push({ value: test.legend(), colors: test.colors });
     });
   }
 

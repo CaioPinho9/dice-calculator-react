@@ -11,11 +11,18 @@ export default class Test {
   public critical: Chances;
   public rpgSystem: string;
   public formsData: any;
+  public colors: {
+    red: string;
+    yellow: string;
+    blue: string;
+    green: string;
+  };
 
   constructor() {
     this.normal = new Chances();
     this.damage = new Chances();
     this.critical = new Chances();
+    this.colors = { red: "", yellow: "", green: "", blue: "" };
   }
 
   public static getDamageIndex(tests: Test[]) {
@@ -60,8 +67,8 @@ export default class Test {
     if (!this.hasDamage()) {
       datasets.push({
         label: "Test " + (index + 1),
-        backgroundColor: this.backgroundColors(index),
-        borderColor: this.backgroundColors(index),
+        backgroundColor: this.getBarColors(index),
+        borderColor: this.getBarColors(index),
         borderRadius: 5,
         minBarThickness: 30,
         maxBarThickness: 100,
@@ -71,8 +78,8 @@ export default class Test {
     } else {
       datasets.push({
         label: "Damage",
-        backgroundColor: this.backgroundColors(index),
-        borderColor: this.backgroundColors(index),
+        backgroundColor: this.getBarColors(index),
+        borderColor: this.getBarColors(index),
         borderRadius: 5,
         minBarThickness: 30,
         maxBarThickness: 100,
@@ -86,8 +93,8 @@ export default class Test {
 
       datasets.push({
         label: "Critical",
-        backgroundColor: index === 0 ? Color.green : Color.randomGreen(),
-        borderColor: index === 0 ? Color.green : Color.randomGreen(),
+        backgroundColor: this.colors.green,
+        borderColor: this.colors.green,
         borderRadius: 5,
         minBarThickness: 30,
         maxBarThickness: 100,
@@ -98,104 +105,95 @@ export default class Test {
     return datasets;
   }
 
-  private backgroundColors(index: number) {
-    let colors: string[] = [];
-    const green: string = index === 0 ? Color.green : Color.randomGreen();
-    const blue: string = index === 0 ? Color.blue : Color.randomBlue();
-    const yellow: string = index === 0 ? Color.yellow : Color.randomYellow();
-    const red: string = index === 0 ? Color.red : Color.randomRed();
+  private getBarColors(index: number) {
+    let barColors: string[] = [];
+    if (this.colors.red === "") {
+      this.colors.green = index === 0 ? Color.green : Color.randomGreen();
+      this.colors.blue = index === 0 ? Color.blue : Color.randomBlue();
+      this.colors.yellow = index === 0 ? Color.yellow : Color.randomYellow();
+      this.colors.red = index === 0 ? Color.red : Color.randomRed();
+    }
 
     if (this.dc === 0) {
-      return [blue];
+      return [this.colors.blue];
     }
 
     if (this.hasDamage()) {
       for (let key = 0; key <= this.damage.max(); key++) {
         if (key === 0) {
-          colors.push(red);
+          barColors.push(this.colors.red);
         } else {
-          colors.push(blue);
+          barColors.push(this.colors.blue);
         }
       }
-      return colors;
+      return barColors;
     }
 
     for (let key = this.normal.min(); key <= this.normal.max(); key++) {
       if (this.rpgSystem === "dnd") {
-        colors.push(this.dndColor(key, green, blue, red));
+        barColors.push(this.dndColor(key));
       } else if (this.rpgSystem === "coc") {
-        colors.push(this.cocColors(key, green, blue, yellow, red));
+        barColors.push(this.cocColors(key));
       } else {
-        colors.push(this.gurpsColor(key, green, blue, red));
+        barColors.push(this.gurpsColor(key));
       }
     }
 
-    return colors;
+    return barColors;
   }
 
-  public dndColor(
-    key: number,
-    green: string,
-    blue: string,
-    red: string
-  ): string {
+  public dndColor(key: number): string {
     if (this.rpgDefault()) {
       if (key < this.dc) {
-        return red;
+        return this.colors.red;
       } else if (key < 20) {
-        return blue;
+        return this.colors.blue;
       } else {
-        return green;
+        return this.colors.green;
       }
     } else {
       if (key < this.dc) {
-        return red;
+        return this.colors.red;
       } else {
-        return blue;
+        return this.colors.blue;
       }
     }
   }
 
-  public cocColors(
-    key: number,
-    green: string,
-    blue: string,
-    yellow: string,
-    red: string
-  ): string {
+  public cocColors(key: number): string {
     if (this.rpgDefault()) {
       if (key <= this.dc / 5) {
-        return green;
+        return this.colors.green;
       } else if (key <= this.dc / 2) {
-        return blue;
+        return this.colors.blue;
       } else if (key <= this.dc) {
-        return yellow;
+        return this.colors.yellow;
       } else {
-        return red;
+        return this.colors.red;
       }
     } else {
       if (key >= this.dc) {
-        return red;
+        return this.colors.red;
       } else {
-        return blue;
+        return this.colors.blue;
       }
     }
   }
 
-  public gurpsColor(key: number, green: string, blue: string, red: string) {
+  public gurpsColor(key: number) {
     if (this.rpgDefault()) {
       if (key > this.dc || key >= 17) {
-        return red;
+        return this.colors.red;
       } else if (key > this.dc - 10 && key > 4) {
-        return blue;
+        return this.colors.blue;
       } else {
-        return green;
+        return this.colors.green;
       }
     } else {
       if (key >= this.dc) {
-        return red;
+        return this.colors.red;
       } else {
-        return blue;
+        return this.colors.blue;
       }
     }
   }
@@ -220,7 +218,11 @@ export default class Test {
 
     //Check if key is a success, depending on the system
     this.normal.getKeys().forEach((key: number) => {
-      if (this.rpgSystem === "gurps" || this.rpgSystem === "coc") {
+      if (this.rpgSystem === "gurps") {
+        if ((this.dc >= key && key < 17) || key < 4) {
+          successChances += this.normal.get(key);
+        }
+      } else if (this.rpgSystem === "coc") {
         if (this.dc >= key) {
           successChances += this.normal.get(key);
         }
@@ -261,7 +263,7 @@ export default class Test {
     return (
       this.formsData.dices === "" ||
       (this.formsData.dices === "3d6" && this.rpgSystem === "gurps") ||
-      (this.formsData.dices === "1d100" && this.rpgSystem === "coc") ||
+      (this.formsData.dices.includes("d100") && this.rpgSystem === "coc") ||
       (this.formsData.dices.includes("d20") && this.rpgSystem === "dnd")
     );
   }

@@ -130,14 +130,46 @@ class DiceCalculator extends Component {
     let key = 0;
     this.state.legends.forEach((legend) => {
       let collumns = [];
-      legend.forEach((collumn) => {
-        collumns.push(<p key={key}>{collumn}</p>);
+      legend.value.forEach((collumn, index) => {
+        let colors = [];
+        let text = [];
+        if (legend.value.length === 1) {
+          colors = [legend.colors.blue];
+          text = ["Normal"];
+        } else if (legend.value.length === 2) {
+          colors = [legend.colors.red, legend.colors.blue];
+          text = ["Fail", "Success"];
+        } else if (legend.value.length === 3) {
+          colors = [legend.colors.red, legend.colors.blue, legend.colors.green];
+          text = ["Fail", "Success", "Critical"];
+        } else {
+          colors = [
+            legend.colors.red,
+            legend.colors.yellow,
+            legend.colors.blue,
+            legend.colors.green,
+          ];
+          text = ["Fail", "Normal", "Hard", "Extreme"];
+        }
+        collumns.push(
+          <div
+            className="Chart-legends"
+            style={{ backgroundColor: colors[index] }}
+          >
+            <p title={text[index]} key={key}>
+              {collumn}
+            </p>
+          </div>
+        );
       });
       key++;
-      collumns.push(<br />);
-      rows.push(<div>{collumns}</div>);
+      rows.push(
+        <div className="Chart-legend-row" style={{ margin: "20px" }}>
+          {collumns}
+        </div>
+      );
     });
-    return <div>{rows}</div>;
+    return <div className="Chart-container">{rows}</div>;
   };
 }
 
