@@ -164,7 +164,7 @@ class DiceCalculator extends Component {
       });
       key++;
       rows.push(
-        <div className="Chart-legend-row" style={{ margin: "20px" }}>
+        <div style={{ margin: "20px" }}>
           {collumns}
         </div>
       );

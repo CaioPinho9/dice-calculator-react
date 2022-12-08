@@ -217,6 +217,15 @@ export default class Dice {
     return probNew;
   }
 
+  public static multiplyProbability(probOld: Chances, value: number): Chances {
+    var probNew = new Chances();
+
+    probOld.getKeys().forEach((key: number) => {
+      probNew.add(key * value, probOld.get(key));
+    });
+    return probNew;
+  }
+
   public getChances(): Chances {
     return this.chances;
   }

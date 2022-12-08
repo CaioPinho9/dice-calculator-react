@@ -168,6 +168,12 @@ export default class Controller {
    *
    */
   private expressionChance(expression: string): Chances {
+    let multiplicator = 1;
+    if (expression.includes("*")) {
+      const multiplication = expression.split("*");
+      expression = multiplication[0];
+      multiplicator = Number(multiplication[1]);
+    }
     const dicesPlusSeparation: string[] = expression.split("+");
     let chances: Chances[] = [];
     let resultChances: Chances = new Chances();
@@ -238,6 +244,8 @@ export default class Controller {
       bonusChance.set(bonus, 1);
       resultChances = bonusChance;
     }
+
+    resultChances = Dice.multiplyProbability(resultChances, multiplicator);
 
     return resultChances;
   }
