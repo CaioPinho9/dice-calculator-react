@@ -112,12 +112,9 @@ class DiceCalculator extends Component {
   handleSubmit = (e) => {
     e.preventDefault();
 
-    this.setState(
-      this.state.controller,
-      this.state.controller.interpreter(
-        this.state.formData,
-        this.props.rpgSystem
-      )
+    this.state.controller.interpreter(
+      this.state.formData,
+      this.props.rpgSystem
     );
 
     this.setState({ legends: this.state.controller.legends });

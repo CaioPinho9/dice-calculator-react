@@ -10,6 +10,7 @@ export default class Test {
   public dc: number;
   public normal: Chances;
   public damage: Chances;
+  public half: Chances;
   public critical: Chances;
   public xCrit: boolean;
   public rpgSystem: string;
@@ -21,12 +22,17 @@ export default class Test {
     green: string;
   };
 
-  constructor() {
+  constructor(dc: number, rpgSystem: string, formsData: any, extended: boolean) {
     this.normal = new Chances();
     this.damage = new Chances();
+    this.half = new Chances();
     this.critical = new Chances();
     this.colors = { red: "", yellow: "", green: "", blue: "" };
     this.xCrit = false;
+    this.dc = dc;
+    this.rpgSystem = rpgSystem;
+    this.formsData = formsData;
+    this.extended = extended;
   }
 
   public static getDamageIndex(tests: Test[]) {
@@ -79,37 +85,60 @@ export default class Test {
         data: this.normal.toPercent().toArray(),
         stack: "Stack " + index,
       });
-    } else {
+      return datasets;
+    }
+
+    datasets.push({
+      label: "Damage",
+      backgroundColor: this.getBarColors(index),
+      borderColor: this.getBarColors(index),
+      borderRadius: 20,
+      minBarThickness: 30,
+      maxBarThickness: 100,
+      data: this.damage
+        .toPercent(this.critical.sum() + this.half.sum())
+        .toArray(),
+      stack: "Stack " + index,
+    });
+
+    if (this.hasHalf()) {
       datasets.push({
-        label: "Damage",
-        backgroundColor: this.getBarColors(index),
-        borderColor: this.getBarColors(index),
+        label: "Half Damage",
+        backgroundColor: this.getBarColors(index, true),
+        borderColor: this.getBarColors(index, true),
         borderRadius: 20,
         minBarThickness: 30,
         maxBarThickness: 100,
-        data: this.damage.toPercent(this.critical).toArray(),
-        stack: "Stack " + index,
-      });
-
-      if (!this.hasCritical()) {
-        return datasets;
-      }
-
-      datasets.push({
-        label: "Critical",
-        backgroundColor: this.colors.green,
-        borderColor: this.colors.green,
-        borderRadius: 20,
-        minBarThickness: 30,
-        maxBarThickness: 100,
-        data: this.critical.toPercent(this.damage).toArray(),
+        data: this.half
+          .toPercent(this.critical.sum() + this.damage.sum())
+          .toArray(),
         stack: "Stack " + index,
       });
     }
+
+    if (!this.hasCritical()) {
+      return datasets;
+    }
+
+    datasets.push({
+      label: "Critical",
+      backgroundColor: this.colors.green,
+      borderColor: this.colors.green,
+      borderRadius: 20,
+      minBarThickness: 30,
+      maxBarThickness: 100,
+      data: this.critical
+        .toPercent(this.damage.sum() + this.half.sum())
+        .toArray(),
+      stack: "Stack " + index,
+    });
+
     return datasets;
   }
 
-  private getBarColors(index: number) {
+  private getBarColors(index: number): string[];
+  private getBarColors(index: number, half: boolean): string[];
+  private getBarColors(index: number): string[] {
     let barColors: string[] = [];
     if (this.colors.red === "") {
       this.colors.green = index === 0 ? Color.green : Color.randomGreen();
@@ -120,6 +149,15 @@ export default class Test {
 
     if (this.dc === 0) {
       return [this.colors.blue];
+    }
+
+    if (this.hasHalf()) {
+      if (arguments[1]) {
+        barColors.push(this.colors.red);
+      } else {
+        barColors.push(this.colors.blue);
+      }
+      return barColors;
     }
 
     if (this.hasDamage()) {
@@ -202,12 +240,12 @@ export default class Test {
     }
   }
 
-  public setExtended(extended: boolean) {
-    this.extended = extended;
-  }
-
   public hasDamage() {
     return this.extended;
+  }
+
+  public hasHalf() {
+    return this.half.sum() !== 0;
   }
 
   public hasCritical() {
@@ -357,6 +395,13 @@ export default class Test {
         average += key * this.critical.get(key);
       });
       total += this.critical.sum();
+    }
+
+    if (this.hasHalf()) {
+      this.half.getKeys().forEach((key: number) => {
+        average += key * this.half.get(key);
+      });
+      total += this.half.sum();
     }
 
     average *= 1 / total;

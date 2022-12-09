@@ -12,4 +12,10 @@ export default class Utils {
   public static twoDecimals(num: number) {
     return Math.round(num * 100) / 100;
   }
+
+  public static bonus(expression: string) {
+    expression = expression.replace(/(-)/g, "+-");
+    let sum = expression.split("+");
+    return sum.reduce((a, b) => Number(a) + Number(b), 0);
+  }
 }

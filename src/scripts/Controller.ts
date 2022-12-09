@@ -7,6 +7,8 @@ import Dice from "./Dice.ts";
 import Chances from "./types/Chances.ts";
 // @ts-ignore
 import Test from "./Test.ts";
+// @ts-ignore
+import Utils from "./Utils.ts";
 
 export default class Controller {
   //Graph object
@@ -28,17 +30,18 @@ export default class Controller {
       let dices: string;
       let damage: string;
       let critical: string;
+      let isHalf: boolean = false;
       //Format
       dices = line.dices.toLowerCase();
-      dices = dices.replace(" ", "");
-      dices = dices.replace("-", "+-");
+      dices = dices.replace(/( )/g, "");
+      dices = dices.replace(/(-)/g, "+-");
       dices = dices === "" ? "d" : dices;
       damage = line.damage.toLowerCase();
-      damage = damage.replace(" ", "");
-      damage = damage.replace("-", "+-");
+      damage = damage.replace(/( )/g, "");
+      damage = damage.replace(/(-)/g, "+-");
       critical = line.crit.toLowerCase();
-      critical = critical.replace(" ", "");
-      critical = critical.replace("-", "+-");
+      critical = critical.replace(/( )/g, "");
+      critical = critical.replace(/(-)/g, "+-");
 
       //Error when using wrong caracters
       if (
@@ -48,25 +51,24 @@ export default class Controller {
         throw new Error("Invalid caracters");
       }
 
-      let testIndex = this.tests.length;
-      if (Test.getDamageIndex(this.tests) === -1) {
-        this.tests.push(new Test());
-      } else {
-        testIndex = Test.getDamageIndex(this.tests);
-      }
-
       //DC used to change graph colors
       if (line.dc === "") {
         line.dc = "0";
       }
+
+      let testIndex = this.tests.length;
+      let dc = Number(line.dc);
       if (rpgSystem === "gurps") {
-        line.dc = String(Number(line.dc) + Number(line.bonus));
+        dc = Number(line.dc) + Utils.bonus(line.bonus);
       }
-      const dc = Number(line.dc);
-      this.tests[testIndex].dc = dc;
-      this.tests[testIndex].rpgSystem = rpgSystem;
-      this.tests[testIndex].formsData = line;
-      this.tests[testIndex].setExtended(line.extended && damage !== "");
+      this.tests.push(
+        new Test(dc, rpgSystem, line, line.extended && damage !== "")
+      );
+
+      if (damage.includes("half")) {
+        damage = damage.replace("half", "");
+        isHalf = true;
+      }
 
       if (critical.includes("x")) {
         critical = critical.replace("x", "");
@@ -100,7 +102,20 @@ export default class Controller {
       let damageChance = this.expressionChance(damage);
 
       //Chance of zero damage
-      damageChance.set(0, (damageChance.sum() * (1 - success)) / success);
+      if (!isHalf) {
+        damageChance.set(0, (damageChance.sum() * (1 - success)) / success);
+      } else {
+        this.tests[testIndex].half = damageChance.copy();
+        this.tests[testIndex].half = Dice.multiplyProbability(
+          this.tests[testIndex].half,
+          1 / 2
+        );
+        this.tests[testIndex].half.multiply(
+          (damageChance.sum() * (1 - success)) /
+            success /
+            this.tests[testIndex].half.sum()
+        );
+      }
 
       //Merge the damage with resultDamage
       if (this.tests[testIndex].damage.size() === 0) {

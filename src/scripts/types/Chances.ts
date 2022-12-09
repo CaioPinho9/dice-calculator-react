@@ -9,12 +9,12 @@ export default class Chances extends Dictionary {
   //Convert a dictionary of chances into an dictionary of percent values
 
   public toPercent(): Percents;
-  public toPercent(expandedChances: Chances): Percents;
+  public toPercent(extraTotal: number): Percents;
   public toPercent(): Percents {
     var percents = new Percents();
     let totalChances = super.sum();
     if (arguments.length > 0) {
-      totalChances += arguments[0].sum();
+      totalChances += arguments[0];
     }
     super.getKeys().forEach((key: number) => {
       const value = super.get(key);
@@ -36,5 +36,18 @@ export default class Chances extends Dictionary {
       decimals.set(key, Math.round((value / totalChances) * 100) / 100);
     });
     return decimals;
+  }
+
+  copy(): Chances {
+    let copy = new Chances();
+    super.getKeys().forEach((key: number) => {
+      const value = super.get(key);
+      copy.add(key, value);
+    });
+    return copy;
+  }
+
+  add(key: number, value: number) {
+    super.add(key, value);
   }
 }

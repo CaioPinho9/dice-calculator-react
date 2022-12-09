@@ -230,7 +230,7 @@ export default class Dice {
     var probNew = new Chances();
 
     probOld.getKeys().forEach((key: number) => {
-      probNew.add(key * value, probOld.get(key));
+      probNew.add(Math.floor(key * value), probOld.get(key));
     });
     return probNew;
   }

@@ -2,6 +2,8 @@
 import Controller from "./Controller.ts";
 // @ts-ignore
 import Test from "./Test.ts";
+// @ts-ignore
+import Utils from "./Utils.ts";
 
 export default class Graph {
   private graphData: { labels: Number[]; datasets: any[] };
@@ -10,6 +12,7 @@ export default class Graph {
   private tests: Test[];
   private config: any;
   private rpgDefault: boolean;
+  private hasDamage: boolean;
 
   constructor(formsData: any[], rpgSystem: string, tests: Test[]) {
     this.formsData = formsData;
@@ -35,6 +38,7 @@ export default class Graph {
           test.critical.set(label, 0);
         }
         this.rpgDefault = this.rpgDefault || test.rpgDefault();
+        this.hasDamage = this.hasDamage || test.hasDamage();
       });
     });
 
@@ -89,7 +93,7 @@ export default class Graph {
 
       if (line.dc !== "0") {
         if (this.rpgSystem === "gurps") {
-          text += " NH" + line.dc;
+          text += " NH" + String(Number(line.dc) + Utils.bonus(line.bonus));
         } else {
           text += " DC" + line.dc;
         }
@@ -138,7 +142,8 @@ export default class Graph {
         },
         scales: {
           x: {
-            reverse: this.rpgSystem !== "dnd" && this.rpgDefault,
+            reverse:
+              this.rpgSystem !== "dnd" && this.rpgDefault && !this.hasDamage,
             ticks: {
               blue: "black",
             },
