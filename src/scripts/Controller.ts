@@ -307,6 +307,14 @@ export default class Controller {
     let positive: boolean = true;
     let nKeep: number = 1;
 
+    if (this.rpgSystem !== "dnd") {
+      if (separation.includes(">")) {
+        separation = separation.replace(">", "<");
+      } else {
+        separation = separation.replace("<", ">");
+      }
+    }
+
     if (separation.includes(">")) {
       //Advantage
       const splited = separation.split(">d");
