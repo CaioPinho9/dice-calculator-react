@@ -63,7 +63,6 @@ input {
 }
 
 .Calculator-chart {
-  border: 2px solid #666;
   border-radius: 10px;
   display: none;
 }
@@ -74,7 +73,7 @@ input {
 
 .Chart-legends {
   display: inline-block;
-  border: 1px solid #333;
+  border: 0px solid #333;
   padding: 5px;
   border-radius: 10px;
   margin-left: 5px;
