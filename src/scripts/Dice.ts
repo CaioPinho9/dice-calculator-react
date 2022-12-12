@@ -6,16 +6,6 @@ import Utils from "./Utils.ts";
 import Decimals from "./types/Decimals.ts";
 
 export default class Dice {
-  private chances: Chances;
-  private sideDice: number;
-  private nDice: number;
-
-  constructor(nDice: number, sideDice: number) {
-    this.nDice = nDice;
-    this.sideDice = sideDice;
-    this.chances = Dice.chances(nDice, sideDice);
-  }
-
   /**
    * Basic probability calculation for n s-dice
    */
@@ -233,16 +223,6 @@ export default class Dice {
       probNew.add(Math.floor(key * value), probOld.get(key));
     });
     return probNew;
-  }
-
-  public getChances(): Chances {
-    return this.chances;
-  }
-  public getSide(): number {
-    return this.sideDice;
-  }
-  public getNDice(): number {
-    return this.nDice;
   }
 
   //Find the probability of one number in n s-dices

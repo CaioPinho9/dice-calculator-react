@@ -13,7 +13,7 @@ export default class Test {
   public half: Chances;
   public critical: Chances;
   public xCrit: boolean;
-  public rpgSystem: string;
+  public rpgSystem: any;
   public formsData: any;
   public colors: {
     red: string;
@@ -22,7 +22,7 @@ export default class Test {
     green: string;
   };
 
-  constructor(dc: number, rpgSystem: string, formsData: any, extended: boolean) {
+  constructor(dc: number, rpgSystem: any, formsData: any, extended: boolean) {
     this.normal = new Chances();
     this.damage = new Chances();
     this.half = new Chances();
@@ -33,6 +33,7 @@ export default class Test {
     this.rpgSystem = rpgSystem;
     this.formsData = formsData;
     this.extended = extended;
+    rpgSystem.rpgDefault(formsData.dices);
   }
 
   public static getDamageIndex(tests: Test[]) {
@@ -172,72 +173,12 @@ export default class Test {
     }
 
     for (let key = this.normal.min(); key <= this.normal.max(); key++) {
-      if (this.rpgSystem === "dnd") {
-        barColors.push(this.dndColor(key));
-      } else if (this.rpgSystem === "coc") {
-        barColors.push(this.cocColors(key));
-      } else {
-        barColors.push(this.gurpsColor(key));
-      }
+      barColors.push(
+        this.rpgSystem.color(key, this.dc, this.colors, this.xCrit)
+      );
     }
 
     return barColors;
-  }
-
-  public dndColor(key: number): string {
-    if (this.rpgDefault()) {
-      if (key < this.dc) {
-        return this.colors.red;
-      } else if (key < (!this.xCrit ? 20 : 19)) {
-        return this.colors.blue;
-      } else {
-        return this.colors.green;
-      }
-    } else {
-      if (key < this.dc) {
-        return this.colors.red;
-      } else {
-        return this.colors.blue;
-      }
-    }
-  }
-
-  public cocColors(key: number): string {
-    if (this.rpgDefault()) {
-      if (key <= this.dc / 5) {
-        return this.colors.green;
-      } else if (key <= this.dc / 2) {
-        return this.colors.blue;
-      } else if (key <= this.dc) {
-        return this.colors.yellow;
-      } else {
-        return this.colors.red;
-      }
-    } else {
-      if (key >= this.dc) {
-        return this.colors.red;
-      } else {
-        return this.colors.blue;
-      }
-    }
-  }
-
-  public gurpsColor(key: number) {
-    if (this.rpgDefault()) {
-      if (key > this.dc || key >= 17) {
-        return this.colors.red;
-      } else if (key > this.dc - 10 && key > 4) {
-        return this.colors.blue;
-      } else {
-        return this.colors.green;
-      }
-    } else {
-      if (key >= this.dc) {
-        return this.colors.red;
-      } else {
-        return this.colors.blue;
-      }
-    }
   }
 
   public hasDamage() {
@@ -258,21 +199,13 @@ export default class Test {
   private successProbability(): number {
     let successChances: number = 0;
 
-    //Check if key is a success, depending on the system
+    //Check if key is a success, depending on the rpgSystem
     this.normal.getKeys().forEach((key: number) => {
-      if (this.rpgSystem === "gurps") {
-        if ((this.dc >= key && key < 17) || key < 4) {
-          successChances += this.normal.get(key);
-        }
-      } else if (this.rpgSystem === "coc") {
-        if (this.dc >= key) {
-          successChances += this.normal.get(key);
-        }
-      } else {
-        if (this.dc <= key) {
-          successChances += this.normal.get(key);
-        }
-      }
+      successChances += this.rpgSystem.success(
+        key,
+        this.dc,
+        this.normal.get(key)
+      );
     });
 
     //Success probability
@@ -280,37 +213,15 @@ export default class Test {
   }
 
   public criticalProbability(): number {
-    let crit: number = 0;
-    if (this.rpgSystem === "dnd") {
-      crit = this.normal.get(20);
-      if (this.xCrit) {
-        crit += this.normal.get(19);
-      }
-    } else if (this.rpgSystem === "coc") {
-      this.normal.getKeys().forEach((key: number) => {
-        if (key <= this.dc / 5) {
-          crit += this.normal.get(key);
-        }
-      });
-    } else {
-      this.normal.getKeys().forEach((key: number) => {
-        if (key <= this.dc - 10 || key <= 4) {
-          crit += this.normal.get(key);
-        }
-      });
-    }
+    let crit: number = this.rpgSystem.critical(
+      this.dc,
+      this.normal,
+      this.xCrit
+    );
+
     crit *= 1 / this.normal.sum();
 
     return crit;
-  }
-
-  public rpgDefault(): boolean {
-    return (
-      this.formsData.dices === "" ||
-      (this.formsData.dices === "3d6" && this.rpgSystem === "gurps") ||
-      (this.formsData.dices.includes("d100") && this.rpgSystem === "coc") ||
-      (this.formsData.dices.includes("d20") && this.rpgSystem === "dnd")
-    );
   }
 
   public legend() {
@@ -325,51 +236,10 @@ export default class Test {
       return percentage;
     }
 
-    if (this.rpgSystem !== "coc" && this.rpgDefault()) {
-      percentage.push(String(Utils.twoDecimals((1 - success) * 100)) + "%");
-      percentage.push(String(Utils.twoDecimals(success * 100)) + "%");
-      percentage.push(String(Utils.twoDecimals(critical * 100)) + "%");
-      return percentage;
-    }
-
-    if (!this.rpgDefault()) {
-      percentage.push(String(Utils.twoDecimals((1 - success) * 100)) + "%");
-      percentage.push(String(Utils.twoDecimals(success * 100)) + "%");
-      return percentage;
-    }
-
-    let red = 0;
-    let yellow = 0;
-    let blue = 0;
-    let green = 0;
-
-    this.normal.getKeys().forEach((key: number) => {
-      if (key <= this.dc / 5) {
-        green += this.normal.get(key);
-      }
-      if (key <= this.dc / 2) {
-        blue += this.normal.get(key);
-      }
-      if (key <= this.dc) {
-        yellow += this.normal.get(key);
-      }
-      if (key > this.dc) {
-        red += this.normal.get(key);
-      }
-    });
-
     percentage.push(
-      String(Utils.twoDecimals((red / this.normal.sum()) * 100)) + "%"
+      ...this.rpgSystem.legend(success, critical, this.normal, this.dc)
     );
-    percentage.push(
-      String(Utils.twoDecimals((yellow / this.normal.sum()) * 100)) + "%"
-    );
-    percentage.push(
-      String(Utils.twoDecimals((blue / this.normal.sum()) * 100)) + "%"
-    );
-    percentage.push(
-      String(Utils.twoDecimals((green / this.normal.sum()) * 100)) + "%"
-    );
+
     return percentage;
   }
 

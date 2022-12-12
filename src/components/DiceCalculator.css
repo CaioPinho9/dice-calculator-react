@@ -3,7 +3,7 @@
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  border: 2px solid #222;
+  border: 0px solid #222;
   border-radius: 10px;
   max-width: 50%;
   background-color: #4e596d;
@@ -23,7 +23,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  border: 2px solid #444;
+  border: 0px solid #444;
 }
 
 .break {
@@ -38,7 +38,7 @@
 .Calculator-form button,
 input {
   background-color: #a3b6d8;
-  border: 2px solid #7181a1;
+  border: 1px solid #7181a1;
   border-radius: 5px;
   padding: 5px;
   text-align: center;
@@ -49,7 +49,7 @@ input {
 
 .Calculator-form button:hover {
   background-color: #7f91b4;
-  border: 2px solid #7181a1;
+  border: 1px solid #7181a1;
 }
 
 .Calculator-form input:focus {
@@ -74,7 +74,7 @@ input {
 
 .Chart-legends {
   display: inline-block;
-  border: 2px solid #333;
+  border: 1px solid #333;
   padding: 5px;
   border-radius: 10px;
   margin-left: 5px;

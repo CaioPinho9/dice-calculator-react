@@ -1,20 +1,16 @@
 // @ts-ignore
-import Controller from "./Controller.ts";
-// @ts-ignore
 import Test from "./Test.ts";
-// @ts-ignore
-import Utils from "./Utils.ts";
 
 export default class Graph {
   private graphData: { labels: Number[]; datasets: any[] };
   private formsData: any[];
-  private rpgSystem: string;
+  private rpgSystem: any;
   private tests: Test[];
   private config: any;
   private rpgDefault: boolean;
   private hasDamage: boolean;
 
-  constructor(formsData: any[], rpgSystem: string, tests: Test[]) {
+  constructor(formsData: any[], rpgSystem: any, tests: Test[]) {
     this.formsData = formsData;
     this.rpgSystem = rpgSystem;
     this.tests = tests;
@@ -37,7 +33,7 @@ export default class Graph {
         if (test.critical.get(label) === undefined) {
           test.critical.set(label, 0);
         }
-        this.rpgDefault = this.rpgDefault || test.rpgDefault();
+        this.rpgDefault = this.rpgDefault || this.rpgSystem.getIsDefault();
         this.hasDamage = this.hasDamage || test.hasDamage();
       });
     });
@@ -81,23 +77,13 @@ export default class Graph {
     this.formsData.forEach((line) => {
       let text = "";
       if (line.dices === "") {
-        const rpgDefault = Controller.rpgDefault("0", "0", this.rpgSystem);
+        const rpgDefault = this.rpgSystem.defaultDice("0", "0");
         text += rpgDefault[0] + "d" + rpgDefault[1];
       } else {
         text += line.dices;
       }
 
-      if (line.bonus !== "" && this.rpgSystem !== "gurps") {
-        text += " + " + line.bonus;
-      }
-
-      if (line.dc !== "0") {
-        if (this.rpgSystem === "gurps") {
-          text += " NH" + String(Number(line.dc) + Utils.bonus(line.bonus));
-        } else {
-          text += " DC" + line.dc;
-        }
-      }
+      text += this.rpgSystem.graphText(line.dc, line.bonus);
 
       if (line.damage !== "") {
         text += " Dam:" + line.damage;
@@ -142,8 +128,7 @@ export default class Graph {
         },
         scales: {
           x: {
-            reverse:
-              this.rpgSystem !== "dnd" && this.rpgDefault && !this.hasDamage,
+            reverse: this.rpgSystem.reverse(this.hasDamage),
             ticks: {
               blue: "black",
             },

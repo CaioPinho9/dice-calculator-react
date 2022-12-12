@@ -8,22 +8,32 @@ import Chances from "./types/Chances.ts";
 // @ts-ignore
 import Test from "./Test.ts";
 // @ts-ignore
-import Utils from "./Utils.ts";
+import DnD from "./systems/DnD.ts";
+// @ts-ignore
+import Gurps from "./systems/Gurps.ts";
+// @ts-ignore
+import CoC from "./systems/CoC.ts";
 
 export default class Controller {
   //Graph object
   public chart: Chart;
-  public rpgSystem: string;
+  public rpgSystem: any;
   public tests: Test[] = [];
   public legends: { value: string[]; colors: string[] }[] = [];
 
-  public interpreter(formsData: any[], rpgSystem: string) {
-    this.rpgSystem = rpgSystem;
+  public interpreter(formsData: any[], system: string) {
     //Refresh
     this.tests = [];
     this.legends = [];
-
     let criticalData: { chances: Chances; probability: number }[] = [];
+
+    if (system === "dnd") {
+      this.rpgSystem = new DnD();
+    } else if (system === "gurps") {
+      this.rpgSystem = new Gurps();
+    } else if (system === "coc") {
+      this.rpgSystem = new CoC();
+    }
 
     //Process each line from forms
     formsData.forEach((line) => {
@@ -57,12 +67,11 @@ export default class Controller {
       }
 
       let testIndex = this.tests.length;
-      let dc = Number(line.dc);
-      if (rpgSystem === "gurps") {
-        dc = Number(line.dc) + Utils.bonus(line.bonus);
-      }
+
+      let dc = this.rpgSystem.dcBonus(line.dc, line.bonus);
+
       this.tests.push(
-        new Test(dc, rpgSystem, line, line.extended && damage !== "")
+        new Test(dc, this.rpgSystem, line, line.extended && damage !== "")
       );
 
       if (damage.includes("half")) {
@@ -82,12 +91,7 @@ export default class Controller {
       } catch (error) {}
 
       //Add bonus
-      if (rpgSystem !== "gurps" && line.bonus !== "") {
-        expressionChance = Dice.deslocateProbability(
-          expressionChance,
-          Number(line.bonus)
-        );
-      }
+      expressionChance = this.rpgSystem.addBonus(expressionChance, line.bonus);
 
       this.tests[testIndex].normal = expressionChance;
       //Normal test
@@ -194,7 +198,7 @@ export default class Controller {
       }
     });
 
-    this.buildChart(formsData, rpgSystem);
+    this.buildChart(formsData);
 
     this.tests.forEach((test) => {
       this.legends.push({ value: test.legend(), colors: test.colors });
@@ -307,13 +311,7 @@ export default class Controller {
     let positive: boolean = true;
     let nKeep: number = 1;
 
-    if (this.rpgSystem !== "dnd") {
-      if (separation.includes(">")) {
-        separation = separation.replace(">", "<");
-      } else {
-        separation = separation.replace("<", ">");
-      }
-    }
+    separation = this.rpgSystem.advantage(separation);
 
     if (separation.includes(">")) {
       //Advantage
@@ -338,7 +336,7 @@ export default class Controller {
     } else {
       return false;
     }
-    const check: string[] = Controller.rpgDefault(nDice, sides, this.rpgSystem);
+    const check: string[] = this.rpgSystem.defaultDice(nDice, sides);
     nDice = check[0];
     sides = check[1];
 
@@ -365,7 +363,7 @@ export default class Controller {
     nDice = splited[0];
     sides = splited[1];
 
-    const check: string[] = Controller.rpgDefault(nDice, sides, this.rpgSystem);
+    const check: string[] = this.rpgSystem.defaultDice(nDice, sides);
     nDice = check[0];
     sides = check[1];
 
@@ -379,42 +377,11 @@ export default class Controller {
   }
 
   /**
-   * If nDice or sides is empty, return default value of the system
-   */
-  private static rpgDefault(
-    nDice: string,
-    sides: string,
-    rpgSystem: string
-  ): string[] {
-    if (nDice === "0" || nDice === "") {
-      if (rpgSystem === "gurps") {
-        nDice = "3";
-      } else {
-        nDice = "1";
-      }
-    }
-    if (sides === "0" || sides === "") {
-      switch (rpgSystem) {
-        case "gurps":
-          sides = "6";
-          break;
-        case "dnd":
-          sides = "20";
-          break;
-        case "coc":
-          sides = "100";
-          break;
-      }
-    }
-    return [nDice, sides];
-  }
-
-  /**
    * Config and create chart
    */
-  private buildChart(formsData: any[], rpgSystem: string) {
+  private buildChart(formsData: any[]) {
     //Config chart
-    const graph = new Graph(formsData, rpgSystem, this.tests);
+    const graph = new Graph(formsData, this.rpgSystem, this.tests);
 
     //Destroy old chart
     if (this.chart) {
