@@ -76,7 +76,7 @@ export default class Gurps extends System {
 
   public legend(success: number, critical: number) {
     let percentage: string[] = [];
-    if (super.isDefault) {
+    if (super.getIsDefault()) {
       percentage.push(String(Utils.twoDecimals((1 - success) * 100)) + "%");
       percentage.push(String(Utils.twoDecimals(success * 100)) + "%");
       percentage.push(String(Utils.twoDecimals(critical * 100)) + "%");

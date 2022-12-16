@@ -42,7 +42,7 @@ export default abstract class System {
 
   public success(key: number, dc: number, chances: number) {}
 
-  public critical(dc: number, chances: number, xCrit) {}
+  public critical(dc: number, chances: number, xCrit: boolean) {}
 
   public legend(success: number, critical: number) {}
 
