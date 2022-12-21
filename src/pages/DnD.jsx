@@ -7,7 +7,6 @@ class DnD extends Component {
   render() {
     return (
       <main className="container Pages">
-        <h1>D&D</h1>
         <DiceCalculator rpgSystem="dnd" />
       </main>
     );

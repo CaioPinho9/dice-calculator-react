@@ -14,14 +14,16 @@
   width: 20vmin;
   background-color: #222;
   margin: 5px;
-  border: 1px solid #000;
+  border: 1px solid #111;
   border-radius: 10px;
   padding-top: 5px;
   padding-bottom: 5px;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 1);
 }
 
-.App-btn:focus {
-  background-color: #033f5f;
+.Btn-active {
+  background-color: #4e596d;
+  box-shadow: -1px -1px rgba(0, 0, 0, 0);
 }
 
 .App-header {
@@ -31,9 +33,29 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   padding: 10px;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid #111;
 }
 
 .App-link {
   color: #61dafb;
+}
+
+.Btn-Home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  padding: 0;
+  left: 0;
+  margin-left: 20px;
+}
+
+.Btn-Home img {
+  height: 9vmin;
+  width: 9vmin;
+  transition: transform 0.5s;
+}
+
+.Btn-Home:hover img {
+  transform: scale(1.15);
 }

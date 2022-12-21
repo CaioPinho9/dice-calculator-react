@@ -4,6 +4,7 @@ import { Route, Routes, BrowserRouter } from "react-router-dom";
 import DnD from "./pages/DnD";
 import Gurps from "./pages/Gurps";
 import CoC from "./pages/CoC";
+import Home from "./pages/Home";
 import React from "react";
 
 function App() {
@@ -12,7 +13,7 @@ function App() {
       <div className="App">
         <Header />
           <Routes>
-            <Route path="/" element={<DnD />} />
+            <Route path="/" element={<Home />} />
             <Route path="/dnd" element={<DnD />} />
             <Route path="/gurps" element={<Gurps />} />
             <Route path="/coc" element={<CoC />} />

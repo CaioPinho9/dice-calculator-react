@@ -25,7 +25,6 @@ class DiceCalculator extends Component {
     return (
       <div className="Calculator-main">
         <form className="Calculator-form" action="">
-          <div className="break"></div>
           {this.state.forms}
           <input
             className="Form-btn"

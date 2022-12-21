@@ -7,7 +7,6 @@ class CoC extends Component {
   render() {
     return (
       <main className="container Pages">
-        <h1>CoC</h1>
         <DiceCalculator rpgSystem="coc" />
       </main>
     );

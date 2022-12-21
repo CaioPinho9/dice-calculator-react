@@ -5,20 +5,21 @@
   background-size: contain;
   border: 0px solid #222;
   border-radius: 10px;
-  max-width: 50%;
+  width: 50vw;
+  min-height: 60vh;
   background-color: #4e596d;
   padding: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  margin-top: 5vmin;
 }
 
 .Calculator-form {
   background-color: rgba(215, 234, 250, 0.8);
-  width: fit-content;
+  width: 50vw;
   border-radius: 10px;
-  padding: 5px;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -59,12 +60,14 @@ input {
 
 .Form-btn {
   width: 30px;
+  height: 30px;
   margin-top: 10px;
 }
 
 .Calculator-chart {
   border-radius: 10px;
   display: none;
+  max-height: 40vh;
 }
 
 .Chart-container {
@@ -73,7 +76,6 @@ input {
 
 .Chart-legends {
   display: inline-block;
-  border: 0px solid #333;
   padding: 5px;
   border-radius: 10px;
   margin-left: 5px;
