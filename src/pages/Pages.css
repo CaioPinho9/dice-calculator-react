@@ -29,6 +29,7 @@ body {
 
 .Home-grid {
   margin: 30px;
+  margin-bottom: 0;
   display: flex;
   justify-content: space-between;
   flex-wrap: wrap;
@@ -38,7 +39,7 @@ body {
 }
 
 .Home-col {
-  background-color: rgba(215, 234, 250, 0.8);
+  background-color: rgba(187, 210, 230, 0.6);
   border-radius: 10px;
   flex: 1 0 20%;
   min-height: 50vmin;
