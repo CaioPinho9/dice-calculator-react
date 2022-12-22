@@ -85,7 +85,7 @@ class Home extends Component {
             <h2>Legend</h2>
             <p>
               Shows the average, probability of failure, success, and critical.
-              In CoC, also the chances of receiving Hard results.
+              Hover for more information.
             </p>
           </div>
         </div>
