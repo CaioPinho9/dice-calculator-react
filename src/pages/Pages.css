@@ -2,6 +2,11 @@ body {
   background-color: #424a5c;
 }
 
+* {
+  margin: 0;
+  padding: 0;
+}
+
 .Pages {
   margin: 0;
   padding: 0;
@@ -12,7 +17,64 @@ body {
   justify-content: center;
 }
 
-.Pages h1 {
-  margin: 0;
+.Home h1 {
+  margin: 10px;
+  padding: 15px;
+  font-size: 50px;
+}
+
+.Home p {
+  font-size: 30px;
+}
+
+.Home-grid {
+  margin: 30px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  text-align: justify;
+}
+
+.Home-col {
+  background-color: rgba(215, 234, 250, 0.8);
+  border-radius: 10px;
+  flex: 1 0 20%;
+  min-height: 50vmin;
+  width: 60vmin;
+  margin: 50px;
   padding: 10px;
+}
+
+.Home-col h1 {
+  text-align: center;
+  font-size: medium;
+  margin: 0;
+}
+
+.Home-col h2 {
+  text-align: center;
+  font-size: medium;
+  margin-top: 10px;
+}
+
+.Home-col p {
+  font-size: medium;
+  padding: 5px;
+}
+
+.Home-col li {
+  font-size: medium;
+  padding: 5px;
+  list-style-position: inside;
+}
+
+.Home-col a {
+  color: black;
+  text-decoration: none;
+}
+
+.Home-col a:hover {
+  color: #424a5c;
 }

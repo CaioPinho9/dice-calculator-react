@@ -14,9 +14,9 @@ function App() {
         <Header />
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/dnd" element={<DnD />} />
-            <Route path="/gurps" element={<Gurps />} />
-            <Route path="/coc" element={<CoC />} />
+            <Route path="/dnd/*" element={<DnD />} />
+            <Route path="/gurps/*" element={<Gurps />} />
+            <Route path="/coc/*" element={<CoC />} />
           </Routes>
       </div>
     </BrowserRouter>

@@ -43,9 +43,9 @@ export default class Controller {
       let isHalf: boolean = false;
       //Format
       dices = line.dices.toLowerCase();
+      dices = dices === "" ? "d" : dices;
       dices = dices.replace(/( )/g, "");
       dices = dices.replace(/(-)/g, "+-");
-      dices = dices === "" ? "d" : dices;
       damage = line.damage.toLowerCase();
       damage = damage.replace(/( )/g, "");
       damage = damage.replace(/(-)/g, "+-");

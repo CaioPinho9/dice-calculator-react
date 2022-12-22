@@ -14,6 +14,9 @@
   justify-content: center;
   flex-direction: column;
   margin-top: 5vmin;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
 }
 
 .Calculator-form {

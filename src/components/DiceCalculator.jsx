@@ -19,6 +19,7 @@ class DiceCalculator extends Component {
   componentDidMount() {
     this.setState({ formQnt: 1 });
     this.changeForm();
+    this.createExample();
   }
 
   render() {
@@ -111,14 +112,7 @@ class DiceCalculator extends Component {
   handleSubmit = (e) => {
     e.preventDefault();
 
-    this.state.controller.interpreter(
-      this.state.formData,
-      this.props.rpgSystem
-    );
-
-    this.setState({ legends: this.state.controller.legends });
-
-    document.getElementById("canvas").style.display = "block";
+    this.handleChart(this.state.formData);
   };
 
   legends = () => {
@@ -135,7 +129,7 @@ class DiceCalculator extends Component {
           text = ["Average", "Normal"];
         } else if (legend.value.length === 3) {
           colors = [gray, legend.colors.red, legend.colors.blue];
-          text = ["Average", "Fail", "Success"];
+          text = ["Average", "Failure", "Success"];
         } else if (legend.value.length === 4) {
           colors = [
             gray,
@@ -143,7 +137,7 @@ class DiceCalculator extends Component {
             legend.colors.blue,
             legend.colors.green,
           ];
-          text = ["Average", "Fail", "Success", "Critical"];
+          text = ["Average", "Failure", "Success", "Critical"];
         } else {
           colors = [
             gray,
@@ -168,6 +162,114 @@ class DiceCalculator extends Component {
       rows.push(<div style={{ margin: "10px" }}>{collumns}</div>);
     });
     return <div className="Chart-container">{rows}</div>;
+  };
+
+  createExample = () => {
+    var url = window.location.href.split("/");
+    var example = url[url.length - 1];
+    var formData = [
+      {
+        id: 0,
+        dices: "",
+        bonus: "",
+        dc: "",
+        damage: "",
+        crit: "",
+        extended: false,
+      },
+    ];
+
+    switch (example) {
+      case "dices":
+        formData[0].dices = "3d6";
+        break;
+
+      case "addition":
+        formData[0].dices = "1d6+1d4";
+        break;
+
+      case "multiplication":
+        formData[0].dices = "4d6*3";
+        break;
+
+      case "advantage":
+        formData[0].dices = "2>d20";
+        break;
+
+      case "disadvantage":
+        formData[0].dices = "2<d20";
+        break;
+
+      case "difficulty":
+        formData[0].dices = "1d20";
+        formData[0].dc = "15";
+        break;
+
+      case "damage":
+        formData[0].dices = "1d20";
+        formData[0].dc = "15";
+        formData[0].damage = "3d6";
+        formData[0].extended = "true";
+        break;
+
+      case "damage-half":
+        formData[0].dices = "1d20";
+        formData[0].dc = "15";
+        formData[0].damage = "3d6half";
+        formData[0].extended = "true";
+        break;
+
+      case "difficulty-gurps":
+        formData[0].dices = "3d6";
+        formData[0].dc = "12";
+        break;
+
+      case "critical-gurps":
+        formData[0].dices = "3d6";
+        formData[0].dc = "16";
+        break;
+
+      case "critical-dnd":
+        formData[0].dices = "1d20";
+        formData[0].dc = "15";
+        formData[0].damage = "3d6";
+        formData[0].crit = "3d6";
+        formData[0].extended = "true";
+        break;
+
+      case "xcritical-dnd":
+        formData[0].dices = "1d20";
+        formData[0].dc = "15";
+        formData[0].damage = "3d6";
+        formData[0].crit = "3d6x";
+        formData[0].extended = "true";
+        break;
+
+      case "status":
+        formData[0].dices = "4d6~1";
+        break;
+
+      case "reroll":
+        formData[0].dices = "1d20r1";
+        break;
+
+      case "health":
+        formData[0].dices = "1d8h";
+        break;
+
+      default:
+        break;
+    }
+
+    this.handleChart(formData);
+  };
+
+  handleChart = (formData) => {
+    this.state.controller.interpreter(formData, this.props.rpgSystem);
+
+    this.setState({ legends: this.state.controller.legends });
+
+    document.getElementById("chart").style.display = "block";
   };
 }
 
