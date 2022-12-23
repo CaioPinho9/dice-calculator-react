@@ -50,6 +50,7 @@ input {
   margin-top: 0;
   height: 5vmin;
   transition: 0.5s;
+  outline: 0;
 }
 
 .Calculator-form button:hover {
