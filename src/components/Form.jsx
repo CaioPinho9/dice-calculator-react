@@ -15,7 +15,7 @@ class Form extends Component {
       <React.Fragment>
         <label htmlFor="">
           <br />
-          <input
+          <input className="Form-default-btn"
             type="button"
             onClick={(e) => {
               this.setState({ extended: !this.state.extended });
@@ -40,7 +40,7 @@ class Form extends Component {
           <label>
             <p>NH</p>
             <input
-              style={{ width: "7vmin" }}
+              style={{ width: "8vmin" }}
               type="text"
               placeholder="NH"
               onChange={(e) => {
@@ -60,7 +60,7 @@ class Form extends Component {
               <input
                 type="text"
                 placeholder="Bonus"
-                style={{ width: "7vmin" }}
+                style={{ width: "8vmin" }}
                 onChange={(e) => {
                   this.setState({ bonus: e.target.value });
                 }}
@@ -72,7 +72,7 @@ class Form extends Component {
           <label>
             <p>DC</p>
             <input
-              style={{ width: "7vmin" }}
+              style={{ width: "8vmin" }}
               type="text"
               placeholder="DC"
               onChange={(e) => {

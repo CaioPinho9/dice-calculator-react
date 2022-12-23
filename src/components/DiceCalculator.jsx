@@ -36,8 +36,7 @@ class DiceCalculator extends Component {
           <input
             className="Form-btn"
             style={{
-              height: "min-content",
-              width: "95px",
+              width: "15vmin",
               marginLeft: "15px",
               marginRight: "15px",
             }}

@@ -44,10 +44,12 @@ input {
   background-color: #a3b6d8;
   border: 1px solid #7181a1;
   border-radius: 5px;
-  padding: 5px;
+  padding-left: 5px;
+  padding-right: 5px;
   text-align: center;
   margin: 5px;
   margin-top: 0;
+  height: 5vmin;
   transition: 0.5s;
 }
 
@@ -56,15 +58,24 @@ input {
   border: 1px solid #7181a1;
 }
 
-.Calculator-form input:focus {
-  outline: 1px solid #1496de;
-  border-color: #1496de;
+.Form-btn {
+  transition: 0.5s;
+  width: 5vmin;
+  margin-top: 10px;
 }
 
-.Form-btn {
-  width: 5vmin;
-  height: 5vmin;
-  margin-top: 10px;
+.Form-btn:hover {
+  background-color: #7f91b4;
+  border: 1px solid #7181a1;
+}
+
+.Form-default-btn {
+  transition: 0.5s;
+}
+
+.Form-default-btn:hover {
+  background-color: #7f91b4;
+  border: 1px solid #7181a1;
 }
 
 .Calculator-chart {
