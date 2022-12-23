@@ -24,6 +24,7 @@ class Home extends Component {
           </div>
           <div className="Home-col">
             <h1>General Commands</h1>
+            <p>Click to try it out!</p>
             <ul>
               <li>
                 <Link to={"/dnd/dice"} title="Ex: 1d20">
