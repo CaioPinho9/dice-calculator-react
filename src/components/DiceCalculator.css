@@ -20,6 +20,7 @@
 .Calculator-form {
   background-color: rgba(215, 234, 250, 0.8);
   width: 50vmax;
+  max-width: 70vw;
   border-radius: 10px;
   display: flex;
   flex-wrap: wrap;
