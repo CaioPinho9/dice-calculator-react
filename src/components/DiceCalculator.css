@@ -5,10 +5,8 @@
   background-size: contain;
   border: 0px solid #222;
   border-radius: 10px;
-  width: 50vw;
-  min-height: 60vh;
   background-color: #4e596d;
-  padding: 50px;
+  padding: 5vmin;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -21,7 +19,7 @@
 
 .Calculator-form {
   background-color: rgba(215, 234, 250, 0.8);
-  width: 50vw;
+  width: 50vmax;
   border-radius: 10px;
   display: flex;
   flex-wrap: wrap;
