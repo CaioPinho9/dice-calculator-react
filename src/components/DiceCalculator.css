@@ -62,8 +62,8 @@ input {
 }
 
 .Form-btn {
-  width: 30px;
-  height: 30px;
+  width: 5vmin;
+  height: 5vmin;
   margin-top: 10px;
 }
 

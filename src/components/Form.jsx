@@ -26,33 +26,21 @@ class Form extends Component {
         </label>
         <label htmlFor="">
           <p>Dices</p>
-          {this.state.extended && (
-            <input
-              style={{ width: "75px" }}
-              type="text"
-              placeholder="Expression"
-              value={this.state.dices}
-              onChange={(e) => {
-                this.setState({ dices: e.target.value });
-              }}
-            ></input>
-          )}
-          {!this.state.extended && (
-            <input
-              type="text"
-              placeholder="Expression"
-              value={this.state.dices}
-              onChange={(e) => {
-                this.setState({ dices: e.target.value });
-              }}
-            ></input>
-          )}
+          <input
+            style={{ width: "20vmin" }}
+            type="text"
+            placeholder="Expression"
+            value={this.state.dices}
+            onChange={(e) => {
+              this.setState({ dices: e.target.value });
+            }}
+          ></input>
         </label>
         {this.props.rpgSystem === "gurps" && (
           <label>
             <p>NH</p>
             <input
-              style={{ width: "50px" }}
+              style={{ width: "7vmin" }}
               type="text"
               placeholder="NH"
               onChange={(e) => {
@@ -72,7 +60,7 @@ class Form extends Component {
               <input
                 type="text"
                 placeholder="Bonus"
-                style={{ width: "50px" }}
+                style={{ width: "7vmin" }}
                 onChange={(e) => {
                   this.setState({ bonus: e.target.value });
                 }}
@@ -84,7 +72,7 @@ class Form extends Component {
           <label>
             <p>DC</p>
             <input
-              style={{ width: "50px" }}
+              style={{ width: "7vmin" }}
               type="text"
               placeholder="DC"
               onChange={(e) => {
@@ -98,7 +86,7 @@ class Form extends Component {
             <label>
               <p>Damage</p>
               <input
-                style={{ width: "150px" }}
+                style={{ width: "18vmin" }}
                 type="text"
                 placeholder="Damage"
                 value={this.state.damage}
@@ -111,7 +99,7 @@ class Form extends Component {
               <label>
                 <p>Crit</p>
                 <input
-                  style={{ width: "75px" }}
+                  style={{ width: "18vmin" }}
                   type="text"
                   placeholder="Crit"
                   value={this.state.crit}

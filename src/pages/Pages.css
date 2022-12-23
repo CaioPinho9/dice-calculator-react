@@ -66,6 +66,7 @@ body {
 }
 
 .Home-col li {
+  text-align: justify;
   font-size: medium;
   padding: 5px;
   list-style-position: inside;
