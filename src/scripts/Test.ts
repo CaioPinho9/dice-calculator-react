@@ -232,7 +232,6 @@ export default class Test {
     percentage.push(average);
 
     if (this.dc === 0) {
-      percentage.push("100%");
       return percentage;
     }
 

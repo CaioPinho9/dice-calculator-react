@@ -27,9 +27,9 @@ class Home extends Component {
             <p>Click to try it out!</p>
             <ul>
               <li>
-                <Link to={"/dnd/dice"} title="Ex: 1d20">
-                  Dice&#40;d&#41;: Number of dices than how many sides, 3d6 =
-                  three dices of 6 sides.
+                <Link to={"/dnd/dices"} title="Ex: 2d8">
+                  Dice&#40;d&#41;: Number of dices than how many sides, 2d8 = 2
+                  dices of 8 sides.
                 </Link>
               </li>
               <li>
@@ -55,7 +55,7 @@ class Home extends Component {
                 </Link>
               </li>
               <li>
-                <Link to={"/dnd/difficult"} title="Ex: 1d20 DC:15">
+                <Link to={"/dnd/difficulty"} title="Ex: 1d20 DC:15">
                   Difficulty&#40;DC/NH&#41;: Sets which numbers are considered
                   success or failure depending on the rpg system.
                 </Link>
@@ -110,7 +110,7 @@ class Home extends Component {
                 </Link>
               </li>
               <li>
-                <Link to={"/gurps/critical-gurps"} title="Ex: 3d6 NH:16">
+                <Link to={"/gurps/critical-gurps"} title="Ex: 3d6 NH:18">
                   Critical: Number 3 and 4 always are critical success, while 17
                   and 18 always are a failure. When a number is below NH-10, it
                   also is a critical success.

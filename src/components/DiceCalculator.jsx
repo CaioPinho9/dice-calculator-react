@@ -123,9 +123,9 @@ class DiceCalculator extends Component {
         let colors = [];
         let text = [];
         let gray = `#a3b6d8`;
-        if (legend.value.length === 2) {
-          colors = [gray, legend.colors.blue];
-          text = ["Average", "Normal"];
+        if (legend.value.length === 1) {
+          colors = [gray];
+          text = ["Average"];
         } else if (legend.value.length === 3) {
           colors = [gray, legend.colors.red, legend.colors.blue];
           text = ["Average", "Failure", "Success"];
@@ -180,11 +180,12 @@ class DiceCalculator extends Component {
 
     switch (example) {
       case "dices":
-        formData[0].dices = "3d6";
+        formData[0].dices = "2d8";
         break;
 
       case "addition":
         formData[0].dices = "1d6+1d4";
+        formData[0].bonus = "2";
         break;
 
       case "multiplication":
@@ -225,7 +226,7 @@ class DiceCalculator extends Component {
 
       case "critical-gurps":
         formData[0].dices = "3d6";
-        formData[0].dc = "16";
+        formData[0].dc = "18";
         break;
 
       case "critical-dnd":
