@@ -183,18 +183,26 @@ class Home extends Component {
             </p>
             <ul>
               <li>
-                <Link to={"/coc"} title="Ex: 1d8h">
+                <Link to={"/coc"} title="Ex: 1d100">
                   Default Dice&#40;1d100&#41;
                 </Link>
               </li>
               <li>
-                <Link to={"/coc"} title="Ex: 1d8h">
+                <Link to={"/coc/difficulty-coc"} title="Ex: 1d100 DC60">
                   Difficulty&#40;DC&#41;: Numbers below DC are success, while
                   above are failure.
                 </Link>
               </li>
-              <li>Hard Success: Numbers below half the DC</li>
-              <li>Extreme Success: Numbers below one fifth the DC</li>
+              <li>
+                <Link to={"/coc/difficulty-coc"} title="Ex: 1d100 DC60">
+                  Hard Success: Numbers below half the DC
+                </Link>
+              </li>
+              <li>
+                <Link to={"/coc/difficulty-coc"} title="Ex: 1d100 DC60">
+                  Extreme Success: Numbers below one fifth the DC
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

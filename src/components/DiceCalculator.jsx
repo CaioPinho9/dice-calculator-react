@@ -256,6 +256,11 @@ class DiceCalculator extends Component {
         formData[0].dices = "1d8h";
         break;
 
+      case "difficulty-coc":
+        formData[0].dices = "1d100";
+        formData[0].dc = "60";
+        break;
+
       default:
         break;
     }
