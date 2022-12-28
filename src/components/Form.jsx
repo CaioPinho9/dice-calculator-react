@@ -15,7 +15,8 @@ class Form extends Component {
       <React.Fragment>
         <label htmlFor="">
           <br />
-          <input className="Form-default-btn"
+          <input
+            className="Form-default-btn"
             type="button"
             onClick={(e) => {
               this.setState({ extended: !this.state.extended });
@@ -110,6 +111,30 @@ class Form extends Component {
               </label>
             )}
           </React.Fragment>
+        )}
+        {this.props.first && (
+          <label>
+            <input
+              className="Form-btn"
+              onClick={() => {
+                this.props.onIncreaseForms();
+              }}
+              type="button"
+              value="+"
+            />
+          </label>
+        )}
+        {!this.props.first && (
+          <label>
+            <input
+              className="Form-btn"
+              onClick={() => {
+                this.props.onDecreaseForms(this.props.id);
+              }}
+              type="button"
+              value="-"
+            />
+          </label>
         )}
         <div className="break"></div>
       </React.Fragment>

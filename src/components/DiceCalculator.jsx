@@ -13,12 +13,13 @@ class DiceCalculator extends Component {
       forms: [],
       legends: [],
       controller: new Controller(),
+      lastId: 0,
     };
   }
 
   componentDidMount() {
     this.setState({ formQnt: 1 });
-    this.changeForm();
+    this.startForms();
     this.createExample();
   }
 
@@ -29,26 +30,16 @@ class DiceCalculator extends Component {
           {this.state.forms}
           <input
             className="Form-btn"
-            onClick={this.increaseForms}
-            type="button"
-            value="+"
-          />
-          <input
-            className="Form-btn"
             style={{
               width: "15vmin",
               marginLeft: "15px",
               marginRight: "15px",
+              marginTop: "10px",
+              paddingTop: "2px",
             }}
             type="submit"
             value="Submit"
             onClick={(e) => this.handleSubmit(e)}
-          />
-          <input
-            className="Form-btn"
-            onClick={this.decreaseForms}
-            type="button"
-            value="-"
           />
           <div className="break"></div>
           {this.legends()}
@@ -58,36 +49,67 @@ class DiceCalculator extends Component {
     );
   }
 
-  componentDidUpdate(_prevProps, prevState) {
-    if (prevState.formQnt !== this.state.formQnt) {
-      this.changeForm();
-    }
-  }
-
-  changeForm() {
-    let forms = [];
-    for (let i = 0; i < this.state.formQnt; i++) {
-      forms.push(
-        <Form
-          key={i}
-          id={i}
-          rpgSystem={this.props.rpgSystem}
-          onChange={this.handleFormChange}
-        />
-      );
-    }
+  startForms() {
+    let forms = [
+      <Form
+        key={"Form" + 0}
+        id={0}
+        rpgSystem={this.props.rpgSystem}
+        onChange={this.handleFormChange}
+        onIncreaseForms={this.increaseForms}
+        onDecreaseForms={this.decreaseForms}
+        first={true}
+      />,
+    ];
     this.setState({ forms: forms });
   }
 
   increaseForms = () => {
+    let forms = this.state.forms.map((value) => {
+      return value;
+    });
+
+    let lastId = ++this.state.lastId;
+    forms.push(
+      <Form
+        key={"Form" + lastId}
+        id={lastId}
+        rpgSystem={this.props.rpgSystem}
+        onChange={this.handleFormChange}
+        onIncreaseForms={this.increaseForms}
+        onDecreaseForms={this.decreaseForms}
+        first={false}
+      />
+    );
+
+    this.setState({ forms: forms });
     this.setState({ formQnt: this.state.formQnt + 1 });
+    this.setState({ lastId: lastId });
   };
 
-  decreaseForms = () => {
+  decreaseForms = (id) => {
     if (this.state.formQnt > 1) {
-      let form = this.state.formData;
-      form.pop();
-      this.setState({ formData: form });
+      let removeIndex = 0;
+      let index = 0;
+      let forms = this.state.forms.reduce(function (result, element) {
+        if (element.props.id !== id) {
+          result.push(element);
+        } else {
+          removeIndex = index;
+        }
+        index++;
+        return result;
+      }, []);
+      index = 0;
+      let data = this.state.formData.reduce(function (result, element) {
+        if (index !== removeIndex) {
+          result.push(element);
+        }
+        index++;
+        return result;
+      }, []);
+      this.setState({ forms: forms });
+      this.setState({ formData: data });
       this.setState({ formQnt: this.state.formQnt - 1 });
     }
   };

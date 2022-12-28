@@ -40,6 +40,7 @@
 
 .Calculator-form button,
 input {
+  display: flex;
   background-color: #a3b6d8;
   border: 1px solid #7181a1;
   border-radius: 5px;
@@ -59,9 +60,11 @@ input {
 }
 
 .Form-btn {
+  align-items: center;
+  justify-content: center;
   transition: 0.5s;
   width: 5vmin;
-  margin-top: 10px;
+  margin-top: 20px;
 }
 
 .Form-btn:hover {

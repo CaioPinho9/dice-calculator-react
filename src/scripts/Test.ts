@@ -154,9 +154,9 @@ export default class Test {
 
     if (this.hasHalf()) {
       if (arguments[1]) {
-        barColors.push(this.colors.red);
-      } else {
         barColors.push(this.colors.blue);
+      } else {
+        barColors.push(this.colors.red);
       }
       return barColors;
     }
