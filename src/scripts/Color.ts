@@ -1,8 +1,8 @@
 export default class Color {
-  public static green = `rgb(81, 158, 60)`;
-  public static blue = `rgb(76, 144, 173)`;
-  public static yellow = `rgb(179, 159, 71)`;
-  public static red = `rgb(189, 97, 74)`;
+  public static green = [`rgb(81, 158, 60)`, `#189E00`, `#009E6D`];
+  public static blue = [`rgb(76, 144, 173)`, `#0072AD`, `#4518AD`];
+  public static yellow = [`rgb(179, 159, 71)`, `#B3AB01`, `#B36300`];
+  public static red = [`rgb(189, 97, 74)`, `#BD2200`, `#BD11B6`];
 
   //Create a random rgb color
   public static randomColor(): string {

@@ -35,7 +35,6 @@ class DiceCalculator extends Component {
               marginLeft: "15px",
               marginRight: "15px",
               marginTop: "10px",
-              paddingTop: "2px",
             }}
             type="submit"
             value="Submit"

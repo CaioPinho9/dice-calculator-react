@@ -142,10 +142,16 @@ export default class Test {
   private getBarColors(index: number): string[] {
     let barColors: string[] = [];
     if (this.colors.red === "") {
-      this.colors.green = index === 0 ? Color.green : Color.randomGreen();
-      this.colors.blue = index === 0 ? Color.blue : Color.randomBlue();
-      this.colors.yellow = index === 0 ? Color.yellow : Color.randomYellow();
-      this.colors.red = index === 0 ? Color.red : Color.randomRed();
+      this.colors.green =
+        index < Color.green.length ? Color.green[index] : Color.randomGreen();
+      this.colors.blue =
+        index < Color.blue.length ? Color.blue[index] : Color.randomBlue();
+      this.colors.yellow =
+        index < Color.yellow.length
+          ? Color.yellow[index]
+          : Color.randomYellow();
+      this.colors.red =
+        index < Color.red.length ? Color.red[index] : Color.randomRed();
     }
 
     if (this.dc === 0) {
