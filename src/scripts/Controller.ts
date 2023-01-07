@@ -107,7 +107,7 @@ export default class Controller {
 
       //Chance of zero damage
       if (!isHalf) {
-        damageChance.set(0, (damageChance.sum() * success) / (1 - success));
+        damageChance.set(0, (damageChance.sum() * (1 - success)) / success);
       } else {
         this.tests[testIndex].half = damageChance.copy();
         this.tests[testIndex].half = Dice.multiplyProbability(
