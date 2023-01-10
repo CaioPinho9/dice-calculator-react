@@ -40,18 +40,22 @@ export default class Controller {
       let dices: string;
       let damage: string;
       let critical: string;
+      let bonus: string;
       let isHalf: boolean = false;
       //Format
-      dices = line.dices.toLowerCase();
-      dices = dices === "" ? "d" : dices;
-      dices = dices.replace(/( )/g, "");
-      dices = dices.replace(/(-)/g, "+-");
+      line.dices = line.dices.toLowerCase();
+      line.dices = line.dices === "" ? this.rpgSystem.dice : line.dices;
+      line.dices = line.dices.replace(/( )/g, "");
+      line.dices = line.dices.replace(/(-)/g, "+-");
+      dices = line.dices;
       damage = line.damage.toLowerCase();
       damage = damage.replace(/( )/g, "");
       damage = damage.replace(/(-)/g, "+-");
       critical = line.crit.toLowerCase();
       critical = critical.replace(/( )/g, "");
       critical = critical.replace(/(-)/g, "+-");
+      bonus = line.bonus.replace(/( )/g, "");
+      bonus = line.bonus.replace(/(-)/g, "+-");
 
       //Error when using wrong caracters
       if (
@@ -61,18 +65,20 @@ export default class Controller {
         throw new Error("Invalid caracters");
       }
 
+      let testIndex = this.tests.length;
+
       //DC used to change graph colors
       if (line.dc === "") {
         line.dc = "0";
       }
-
-      let testIndex = this.tests.length;
 
       let dc = this.rpgSystem.dcBonus(line.dc, line.bonus);
 
       this.tests.push(
         new Test(dc, this.rpgSystem, line, line.extended && damage !== "")
       );
+
+      this.expressionChance(line.bonus, testIndex);
 
       if (damage.includes("half")) {
         damage = damage.replace("half", "");
@@ -87,11 +93,14 @@ export default class Controller {
       //Main dice probability
       let expressionChance: Chances;
       try {
-        expressionChance = this.expressionChance(dices);
+        expressionChance = this.expressionChance(dices, testIndex);
       } catch (error) {}
 
       //Add bonus
-      expressionChance = this.rpgSystem.addBonus(expressionChance, line.bonus);
+      expressionChance = this.rpgSystem.addBonus(
+        expressionChance,
+        this.tests[testIndex].bonus
+      );
 
       this.tests[testIndex].normal = expressionChance;
       //Normal test
@@ -103,7 +112,7 @@ export default class Controller {
       //Success probability
       const success = this.tests[testIndex].successProbability();
       //Damage chance
-      let damageChance = this.expressionChance(damage);
+      let damageChance = this.expressionChance(damage, testIndex);
 
       //Chance of zero damage
       if (!isHalf) {
@@ -134,7 +143,7 @@ export default class Controller {
 
       if (critical !== "") {
         criticalData.push({
-          chances: this.expressionChance(critical),
+          chances: this.expressionChance(critical, testIndex),
           probability: this.tests[testIndex].criticalProbability(),
         });
       }
@@ -208,7 +217,7 @@ export default class Controller {
   /**
    *
    */
-  private expressionChance(expression: string): Chances {
+  private expressionChance(expression: string, testIndex: number): Chances {
     let multiplicator = 1;
     if (expression.includes("*")) {
       const multiplication = expression.split("*");
@@ -263,7 +272,7 @@ export default class Controller {
           chances.push(this.normalChance(separation, reRoll, hitDices));
         }
       } else {
-        bonus += Number(separation);
+        this.tests[testIndex].bonus += Number(separation);
       }
     });
 
@@ -277,10 +286,7 @@ export default class Controller {
       );
     }
 
-    if (expression.includes("d")) {
-      //Sum the bonus
-      resultChances = Dice.deslocateProbability(resultChances, bonus);
-    } else {
+    if (!expression.includes("d")) {
       let bonusChance = new Chances();
       bonusChance.set(bonus, 1);
       resultChances = bonusChance;

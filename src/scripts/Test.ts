@@ -8,6 +8,7 @@ import Utils from "./Utils.ts";
 export default class Test {
   private extended: boolean;
   public dc: number;
+  public bonus: number;
   public normal: Chances;
   public damage: Chances;
   public half: Chances;
@@ -30,6 +31,7 @@ export default class Test {
     this.colors = { red: "", yellow: "", green: "", blue: "" };
     this.xCrit = false;
     this.dc = dc;
+    this.bonus = 0;
     this.rpgSystem = rpgSystem;
     this.formsData = formsData;
     this.extended = extended;
@@ -180,7 +182,7 @@ export default class Test {
 
     for (let key = this.normal.min(); key <= this.normal.max(); key++) {
       barColors.push(
-        this.rpgSystem.color(key, this.dc, this.colors, this.xCrit)
+        this.rpgSystem.color(key, this.dc, this.colors, this.xCrit, this.bonus)
       );
     }
 
@@ -222,7 +224,8 @@ export default class Test {
     let crit: number = this.rpgSystem.critical(
       this.dc,
       this.normal,
-      this.xCrit
+      this.xCrit,
+      this.bonus
     );
 
     crit *= 1 / this.normal.sum();

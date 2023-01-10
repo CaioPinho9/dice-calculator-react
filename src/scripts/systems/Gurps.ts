@@ -6,6 +6,8 @@ import Utils from "../Utils.ts";
 import System from "./System.ts";
 
 export default class Gurps extends System {
+  public dice = "3d6";
+
   public dcBonus(dc: string, bonus: string): number {
     return Number(dc) + Utils.bonus(bonus);
   }
@@ -34,7 +36,7 @@ export default class Gurps extends System {
   }
 
   public rpgDefault(dices: string): boolean {
-    super.setIsDefault(dices === "" || dices === "3d6");
+    super.setIsDefault(dices === "3d6");
     return super.getIsDefault();
   }
 

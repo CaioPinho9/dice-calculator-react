@@ -6,6 +6,8 @@ import Utils from "../Utils.ts";
 import System from "./System.ts";
 
 export default class CoC extends System {
+  public dice = "1d100";
+
   public advantage(separation: string) {
     if (separation.includes(">")) {
       separation = separation.replace(">", "<");
@@ -26,7 +28,13 @@ export default class CoC extends System {
   }
 
   public rpgDefault(dices: string): boolean {
-    super.setIsDefault(dices === "" || dices.includes("d100"));
+    if (!dices.includes(">") && !dices.includes("<")) {
+      if (dices.split("d")[0] !== "" && dices.split("d")[0] !== "1") {
+        super.setIsDefault(false);
+        return super.getIsDefault();
+      }
+    }
+    super.setIsDefault(dices.includes("d100"));
     return super.getIsDefault();
   }
 

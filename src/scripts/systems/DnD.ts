@@ -6,6 +6,8 @@ import Utils from "../Utils.ts";
 import System from "./System.ts";
 
 export default class DnD extends System {
+  public dice = "1d20";
+
   public defaultDice(nDice: string, sides: string): string[] {
     if (nDice === "0" || nDice === "") {
       nDice = "1";
@@ -17,15 +19,27 @@ export default class DnD extends System {
   }
 
   public rpgDefault(dices: string): boolean {
-    super.setIsDefault(dices === "" || dices.includes("d20"));
+    if (!dices.includes(">") && !dices.includes("<")) {
+      if (dices.split("d")[0] !== "" && dices.split("d")[0] !== "1") {
+        super.setIsDefault(false);
+        return super.getIsDefault();
+      }
+    }
+    super.setIsDefault(dices.includes("d20"));
     return super.getIsDefault();
   }
 
-  public color(key: number, dc: number, colors: any, xCrit: boolean): string {
+  public color(
+    key: number,
+    dc: number,
+    colors: any,
+    xCrit: boolean,
+    bonus: number
+  ): string {
     if (super.getIsDefault()) {
       if (key < dc) {
         return colors.red;
-      } else if (key < (!xCrit ? 20 : 19)) {
+      } else if (key < (!xCrit ? 20 + bonus : 19 + bonus)) {
         return colors.blue;
       } else {
         return colors.green;
@@ -47,10 +61,10 @@ export default class DnD extends System {
     }
   }
 
-  public critical(dc: number, normal: Chances, xCrit: boolean) {
-    let crit = normal.get(20);
+  public critical(dc: number, normal: Chances, xCrit: boolean, bonus: number) {
+    let crit = normal.get(20 + bonus);
     if (xCrit) {
-      crit += normal.get(19);
+      crit += normal.get(19 + bonus);
     }
     return crit;
   }

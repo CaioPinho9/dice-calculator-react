@@ -12,7 +12,15 @@ export default class Dice {
   public static chances(nDice: number, sideDice: number): Chances {
     var decimal = new Decimals();
     for (var key = nDice; key <= sideDice * nDice; key++) {
-      decimal.set(key, this.exactSumProbability(key, nDice, sideDice));
+      let normalizedKey = key;
+      if (key > Math.floor((sideDice * nDice) / 2)) {
+        normalizedKey = sideDice * nDice - key + Number(nDice);
+      }
+
+      decimal.set(
+        key,
+        this.exactSumProbability(normalizedKey, nDice, sideDice)
+      );
     }
     return decimal.toChance(sideDice ** nDice);
   }

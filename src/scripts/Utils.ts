@@ -5,7 +5,7 @@ export default class Utils {
 
   public static fatorial(num: number) {
     var result = 1;
-    for (var i = 2; i <= num; i++) result = result * i;
+    for (var i = 2; i <= num; i++) result *= i;
     return result;
   }
 
