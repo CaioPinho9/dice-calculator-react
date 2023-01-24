@@ -78,7 +78,7 @@ export default class Controller {
         new Test(dc, this.rpgSystem, line, line.extended && damage !== "")
       );
 
-      this.expressionChance(line.bonus, testIndex);
+      this.expressionChance(bonus, testIndex, false);
 
       if (damage.includes("half")) {
         damage = damage.replace("half", "");
@@ -93,7 +93,7 @@ export default class Controller {
       //Main dice probability
       let expressionChance: Chances;
       try {
-        expressionChance = this.expressionChance(dices, testIndex);
+        expressionChance = this.expressionChance(dices, testIndex, false);
       } catch (error) {}
 
       //Add bonus
@@ -112,7 +112,7 @@ export default class Controller {
       //Success probability
       const success = this.tests[testIndex].successProbability();
       //Damage chance
-      let damageChance = this.expressionChance(damage, testIndex);
+      let damageChance = this.expressionChance(damage, testIndex, true);
 
       //Chance of zero damage
       if (!isHalf) {
@@ -143,7 +143,7 @@ export default class Controller {
 
       if (critical !== "") {
         criticalData.push({
-          chances: this.expressionChance(critical, testIndex),
+          chances: this.expressionChance(critical, testIndex, true),
           probability: this.tests[testIndex].criticalProbability(),
         });
       }
@@ -217,7 +217,11 @@ export default class Controller {
   /**
    *
    */
-  private expressionChance(expression: string, testIndex: number): Chances {
+  private expressionChance(
+    expression: string,
+    testIndex: number,
+    damage: boolean
+  ): Chances {
     let multiplicator = 1;
     if (expression.includes("*")) {
       const multiplication = expression.split("*");
@@ -228,7 +232,7 @@ export default class Controller {
     let chances: Chances[] = [];
     let resultChances: Chances = new Chances();
     let sum: boolean[] = [];
-    let bonus: number = 0;
+    let damageBonus: number = 0;
 
     dicesPlusSeparation.forEach((separation) => {
       let reRoll: number;
@@ -271,8 +275,10 @@ export default class Controller {
           //Normal calculation
           chances.push(this.normalChance(separation, reRoll, hitDices));
         }
-      } else {
+      } else if (!damage) {
         this.tests[testIndex].bonus += Number(separation);
+      } else {
+        damageBonus = Number(separation);
       }
     });
 
@@ -286,9 +292,13 @@ export default class Controller {
       );
     }
 
+    if (damage) {
+      resultChances = this.rpgSystem.addBonus(resultChances, damageBonus);
+    }
+
     if (!expression.includes("d")) {
       let bonusChance = new Chances();
-      bonusChance.set(bonus, 1);
+      bonusChance.set(this.tests[testIndex].bonus, 1);
       resultChances = bonusChance;
     }
 
