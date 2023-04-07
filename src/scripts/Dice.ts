@@ -100,28 +100,21 @@ export default class Dice {
     for (var index = 0; index < advantageArray.length; ) {
       //Saves to add
       var sortArray = [...advantageArray];
-      var result: number = 0;
-      for (var i = 0; i < nKeep; i++) {
-        var value: number = sortArray.splice(0, 1)[0];
-        for (var sortI = 0; sortI < sortArray.length; sortI++) {
-          if (advantage) {
-            if (value < sortArray[sortI]) {
-              sortArray.push(value);
-              value = sortArray.splice(sortI, 1)[0];
-            }
-          } else {
-            if (value > sortArray[sortI]) {
-              sortArray.push(value);
-              value = sortArray.splice(sortI, 1)[0];
-            }
-          }
-        }
-        result += value;
-      }
-      if (chancesArray[result] == null) {
-        chancesArray[result] = 1;
+      var resultArray: Array<number> = []
+      if (advantage) {
+        sortArray.sort((a, b) => b - a);
+        resultArray = sortArray.slice(0, nKeep);
       } else {
-        chancesArray[result] += 1;
+        sortArray.sort((a, b) => b + a);
+        resultArray = sortArray.slice(0, nKeep);
+      }
+
+      var value = resultArray.reduce((total, num) => total + num, 0);
+
+      if (chancesArray[value] == null) {
+        chancesArray[value] = 1;
+      } else {
+        chancesArray[value] += 1;
       }
 
       //Checks all index
