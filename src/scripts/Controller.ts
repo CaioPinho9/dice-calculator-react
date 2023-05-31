@@ -349,20 +349,32 @@ export default class Controller {
       //splided[1] = nRemove, how many dices are removed
       //nKeep is how many dices are used in the end
       nKeep = Number(nDice) - Number(splited[1]);
-    } else {
-      return false;
     }
+
     const check: string[] = this.rpgSystem.defaultDice(nDice, sides);
     nDice = check[0];
     sides = check[1];
 
-    return Dice.advantageChances(
-      Number(nDice),
-      Number(sides),
-      positive,
-      nKeep,
-      reRoll !== 0
-    );
+    let chances
+
+    if (nKeep === 1) {
+      chances = Dice.advantageChances(
+          Number(nDice),
+          Number(sides),
+          positive,
+          reRoll !== 0
+      );
+    } else {
+      chances = Dice.statusChances(
+          Number(nDice),
+          Number(sides),
+          positive,
+          nKeep,
+          reRoll !== 0
+      );
+    }
+
+    return chances
   }
 
   /**
