@@ -16,6 +16,8 @@ export default class Test {
   public xCrit: boolean;
   public rpgSystem: any;
   public formsData: any;
+  public bestialSuccess: number;
+  public bestialFailure: number;
   public colors: {
     red: string;
     yellow: string;

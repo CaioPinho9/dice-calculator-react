@@ -239,10 +239,12 @@ export default class Controller {
         let resultChances: Chances = new Chances();
         let sum: boolean[] = [];
         let damageBonus: number = 0;
+        let hungerDices: number = 0;
 
         dicesPlusSeparation.forEach((separation) => {
             let reRoll: number;
             let hitDices: boolean = false;
+            let critico: boolean = false;
 
             //Calculate chances only when this separation is a dice
             if (separation.includes("d")) {
@@ -265,9 +267,20 @@ export default class Controller {
 
                 //Check if is a hitdice calculation
                 if (separation.includes("h")) {
-                    separation = separation.replace("h", "");
-                    reRoll = 1;
-                    hitDices = true;
+                    if (!(this.rpgSystem instanceof Vampire)) {
+                        separation = separation.replace("h", "");
+                        reRoll = 1;
+                        hitDices = true;
+                    } else {
+                        let values = separation.split("h")
+                        separation = values[0]
+                        hungerDices = Number(values[1])
+                    }
+                }
+
+                if (separation.includes("c")) {
+                    separation = separation.replace("c", "");
+                    critico = true;
                 }
 
                 if (
@@ -278,9 +291,23 @@ export default class Controller {
                     //Advantage/disadvantage calculation
                     chances.push(this.advantage(separation, reRoll));
                     // @ts-ignore
-                } else if (this.rpgSystem  instanceof Vampire) {
+                } else if (this.rpgSystem instanceof Vampire) {
                     // @ts-ignore
-                    chances.push(this.rpgSystem.normalChance(separation, reRoll, hitDices));
+                    let nDice: string | number;
+                    let sides: string | number;
+                    const splited = separation.split("d");
+                    nDice = splited[0];
+                    sides = splited[1];
+
+                    const check: string[] = this.rpgSystem.defaultDice(nDice, sides);
+                    nDice = Number(check[0]);
+                    sides = Number(check[1]);
+
+                    chances.push(this.rpgSystem.normalChance(nDice, sides, critico));
+
+                    let criticals = this.rpgSystem.bestial(nDice, hungerDices, this.tests[testIndex].dc)
+                    this.tests[testIndex].bestialSuccess = criticals[0]
+                    this.tests[testIndex].bestialFailure = criticals[1]
                 } else {
                     //Normal calculation
                     chances.push(this.normalChance(separation, reRoll, hitDices));
