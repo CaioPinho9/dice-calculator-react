@@ -243,6 +243,7 @@ export default class Controller {
         dicesPlusSeparation.forEach((separation) => {
             let reRoll: number;
             let hitDices: boolean = false;
+            let critico: boolean = false;
 
             //Calculate chances only when this separation is a dice
             if (separation.includes("d")) {
@@ -270,6 +271,11 @@ export default class Controller {
                     hitDices = true;
                 }
 
+                if (separation.includes("c")) {
+                    separation = separation.replace("c", "");
+                    critico = true;
+                }
+
                 if (
                     separation.includes(">") ||
                     separation.includes("<") ||
@@ -278,9 +284,9 @@ export default class Controller {
                     //Advantage/disadvantage calculation
                     chances.push(this.advantage(separation, reRoll));
                     // @ts-ignore
-                } else if (this.rpgSystem  instanceof Vampire) {
+                } else if (this.rpgSystem instanceof Vampire) {
                     // @ts-ignore
-                    chances.push(this.rpgSystem.normalChance(separation, reRoll, hitDices));
+                    chances.push(this.rpgSystem.normalChance(separation, critico));
                 } else {
                     //Normal calculation
                     chances.push(this.normalChance(separation, reRoll, hitDices));

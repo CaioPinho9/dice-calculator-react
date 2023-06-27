@@ -28,17 +28,35 @@ export default class Dice {
     /**
      * Probability calculation for n s-dice to be above value
      */
-    public static chancesAbove(nDice: number, sideDice: number): Chances {
+    public static chancesVampire(nDice: number, sideDice: number, critico): Chances {
         let decimal = new Decimals();
         let success_chance = 0.5
-        for (let key = 0; key <= nDice; key++) {
+        let critical_chance = 0.1
+        for (let success = 0; success <= nDice; success++) {
             let probability = 1
-            probability *= success_chance ** (key)
-            probability *= (1 - success_chance) ** (nDice - key)
-            probability *= Utils.permutation(nDice, key)
+            probability *= (success_chance) ** (success)
+            probability *= (1 - success_chance) ** (nDice - success)
+            probability *= Utils.permutation(nDice, success)
 
-            decimal.set(key, probability);
+            decimal.set(success, probability);
         }
+
+        if (critico) {
+            for (let critical = 0; critical <= nDice; critical++) {
+                for (let success = 0; success <= nDice - critical; success++) {
+                    let probability = 1
+                    probability *= (critical_chance) ** (critical)
+                    probability *= (success_chance - critical_chance) ** (success)
+                    probability *= (1 - success_chance) ** (nDice - success)
+                    probability *= Utils.permutation(nDice, success + critical)
+
+                    let key = success + critical
+                    decimal.add(key + (Math.floor(critical / 2) * 2), probability);
+                    decimal.add(key, -probability);
+                }
+            }
+        }
+
         return decimal.toChance(sideDice ** nDice);
     }
 

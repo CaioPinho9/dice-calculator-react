@@ -31,7 +31,7 @@ export default class Vampire extends System {
         return super.getIsDefault();
     }
 
-    public normalChance(separation: string) {
+    public normalChance(separation: string, critico: boolean) {
         let nDice: string;
         let sides: string;
         const splited = separation.split("d");
@@ -43,8 +43,36 @@ export default class Vampire extends System {
         sides = check[1];
 
         if (sides === "10") {
-            return Dice.chancesAbove(Number(nDice), Number(sides));
+            return Dice.chancesVampire(Number(nDice), Number(sides), critico);
         }
         return Dice.chances(Number(nDice), Number(sides));
+    }
+
+    public color(
+        key: number,
+        dc: number,
+        colors: any,
+        xCrit: boolean,
+        bonus: number
+    ): string {
+        if (key < dc) {
+            return colors.red;
+        } else {
+            return colors.blue;
+        }
+    }
+
+    public success(key: number, dc: number, chances: number) {
+        if (dc <= key) {
+            return chances;
+        } else {
+            return 0;
+        }
+    }
+    public legend(success: number, critical: number) {
+        let percentage: string[] = [];
+        percentage.push(String(Utils.twoDecimals((1 - success) * 100)) + "%");
+        percentage.push(String(Utils.twoDecimals(success * 100)) + "%");
+        return percentage;
     }
 }
