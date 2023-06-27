@@ -6,6 +6,7 @@ import Gurps from "./pages/Gurps";
 import CoC from "./pages/CoC";
 import Home from "./pages/Home";
 import React from "react";
+import Vampire from "./pages/Vampire";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/dnd/*" element={<DnD />} />
             <Route path="/gurps/*" element={<Gurps />} />
             <Route path="/coc/*" element={<CoC />} />
+            <Route path="/vampire/*" element={<Vampire />} />
           </Routes>
       </div>
     </BrowserRouter>

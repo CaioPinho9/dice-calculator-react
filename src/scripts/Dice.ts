@@ -26,6 +26,23 @@ export default class Dice {
     }
 
     /**
+     * Probability calculation for n s-dice to be above value
+     */
+    public static chancesAbove(nDice: number, sideDice: number): Chances {
+        let decimal = new Decimals();
+        let success_chance = 0.5
+        for (let key = 0; key <= nDice; key++) {
+            let probability = 1
+            probability *= success_chance ** (key)
+            probability *= (1 - success_chance) ** (nDice - key)
+            probability *= Utils.permutation(nDice, key)
+
+            decimal.set(key, probability);
+        }
+        return decimal.toChance(sideDice ** nDice);
+    }
+
+    /**
      * Recalculate probability if number is lower than "reroll"
      */
     public static chancesReroll(
